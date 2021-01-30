@@ -1,0 +1,23 @@
+{
+  "name": "notion-sticker-creator",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "dom-to-image": "^2.6.0",
+    "vue": "^3.0.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.2.1",
+    "@vitejs/plugin-vue": "^1.1.2",
+    "@vue/compiler-sfc": "^3.0.5",
+    "autoprefixer": "^10.2.3",
+    "postcss": "^8.2.4",
+    "pug": "^3.0.0",
+    "tailwindcss": "^2.0.2",
+    "vite": "^2.0.0-beta.50"
+  }
+}
