@@ -21,7 +21,7 @@ div(class="relative")
 
 <script setup>
 import {computed, onMounted} from 'vue'
-import frameUrl from '/src/assets/notion-logo-frame.png'
+import frameUrl from '/assets/notion-logo-frame.png'
 
 ref: canvas
 ref: imgSrc
