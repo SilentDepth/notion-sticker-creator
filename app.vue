@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="h-10 flex")
-  input(v-model="text" type="text" placeholder="最多四个字符" class="w-32 text-center text-white bg-gray-800 border border-black rounded-md")
+  input(v-model="text" type="text" placeholder="最多四个字符" class="w-32 text-center text-white bg-gray-800 border border-black rounded-md focus:outline-none")
   div(class="relative ml-1 w-16 border border-black rounded-md overflow-hidden" :style="{backgroundColor: color}")
     input(v-model="color" type="color" class="absolute inset-0 w-full h-full opacity-0")
 
