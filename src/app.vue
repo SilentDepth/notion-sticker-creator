@@ -1,8 +1,8 @@
 <template lang="pug">
-div(class="flex")
-  input(v-model="text" type="text" placeholder="最多四个字符" class="w-32 text-center")
-  div(class="relative ml-1 w-16")
-    input(v-model="color" type="color" class="absolute inset-0 w-full h-full")
+div(class="h-10 flex")
+  input(v-model="text" type="text" placeholder="最多四个字符" class="w-32 text-center text-white bg-gray-800 border border-black rounded-md")
+  div(class="relative ml-1 w-16 border border-black rounded-md overflow-hidden" :style="{backgroundColor: color}")
+    input(v-model="color" type="color" class="absolute inset-0 w-full h-full opacity-0")
 
 //div(class="flex" style="width: 600px;")
   input(v-model="matrix[0]" type="number" class="flex-1 min-w-0")
@@ -14,8 +14,8 @@ div(class="flex")
 //input(v-model="fontSize" type="number" style="width: 100px;")
 
 div(class="relative")
-  canvas(ref="canvas" :width="size" :height="size" class="" @click="debug")
-  //img(:src="imgSrc" class="absolute inset-0 w-full h-full")
+  canvas(ref="canvas" :width="size" :height="size" class="invisible" @click="debug")
+  img(:src="imgSrc" class="absolute inset-0 w-full h-full")
 
 </template>
 
@@ -24,7 +24,7 @@ import {computed, onMounted} from 'vue'
 import frameUrl from '/src/assets/notion-logo-frame.png'
 
 ref: canvas
-// ref: imgSrc
+ref: imgSrc
 ref: size = 320
 ref: color = '#000'
 ref: text = '你好世界'
@@ -73,11 +73,6 @@ function render () {
       putText(ctx, text[0], 'bottom right', width / 2, height / 2)
       putText(ctx, text[1], 'top left', width / 2, height / 2)
       break
-    // case 3:
-    //   putText(ctx, text[0], 'bottom right', width / 2, height / 2)
-    //   putText(ctx, text[1], 'bottom left', width / 2, height / 2)
-    //   putText(ctx, text[2], 'top right', width / 2, height / 2)
-    //   break
     default:
       putText(ctx, text[0], 'bottom right', width / 2, height / 2)
       putText(ctx, text[1], 'bottom left', width / 2, height / 2)
@@ -87,7 +82,7 @@ function render () {
   flag = false
 
   ctx.restore()
-  // imgSrc = canvas.toDataURL()
+  imgSrc = canvas.toDataURL()
   requestAnimationFrame(render)
 }
 
