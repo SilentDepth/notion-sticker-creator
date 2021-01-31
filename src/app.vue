@@ -1,70 +1,133 @@
 <template lang="pug">
-div(class="mb-16 h-12 flex")
-  input(v-model="color" type="color" class="flex-none w-12 h-full")
-  input(
-    type="text"
-    placeholder="最多四个字"
-    class="flex-1 w-32 font-sans text-center border-l-0 border-gray-400"
-    @vnode-mounted="$event.el.value = text"
-    @input="text = $event.target.value.slice(0, 4)"
-  )
+div(class="flex")
+  input(v-model="text" type="text" placeholder="最多四个字符" class="w-32 text-center")
+  div(class="relative ml-1 w-16")
+    input(v-model="color" type="color" class="absolute inset-0 w-full h-full")
 
-div(class="relative" :style="{width: size + 'px', height: size + 'px'}")
-  div(ref="preview" v-show="!text || !imgSrc" class="w-full h-full bg-frame")
-    div(class="absolute font-serif font-black leading-none text-center select-none flex justify-center items-center text-area" :style="textStyle") {{ text }}
-  img(v-show="imgSrc" :src="imgSrc" class="absolute inset-0 w-full h-full")
-  div(v-show="text && !imgSrc" class="absolute inset-0 w-full h-full bg-gray-100 bg-opacity-50")
-    div(class="absolute inset-0 m-auto w-10 h-10 bg-black bg-opacity-75 rounded-md flex justify-center items-center")
-      svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6 text-white animate-spin")
-        circle(cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25")
-        path(d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor")
+//div(class="flex" style="width: 600px;")
+  input(v-model="matrix[0]" type="number" class="flex-1 min-w-0")
+  input(v-model="matrix[1]" type="number" class="flex-1 min-w-0")
+  input(v-model="matrix[2]" type="number" class="flex-1 min-w-0")
+  input(v-model="matrix[3]" type="number" class="flex-1 min-w-0")
+  input(v-model="matrix[4]" type="number" class="flex-1 min-w-0")
+  input(v-model="matrix[5]" type="number" class="flex-1 min-w-0")
+//input(v-model="fontSize" type="number" style="width: 100px;")
 
-//div(class="fixed top-10 left-10 font-serif leading-none font-black" style="background: #0f0; font-size: 100px;")
-  span(style="transform: translateY(-6%);") 龍
+div(class="relative")
+  canvas(ref="canvas" :width="size" :height="size" class="" @click="debug")
+  //img(:src="imgSrc" class="absolute inset-0 w-full h-full")
+
 </template>
 
 <script setup>
-import {computed, watch} from 'vue'
-import domToImage from 'dom-to-image'
+import {computed, onMounted} from 'vue'
+import frameUrl from '/src/assets/notion-logo-frame.png'
 
-ref: preview
-ref: size = 210
-ref: text = ''
-ref: color = '#000000'
-ref: buffers = {}
+ref: canvas
+// ref: imgSrc
+ref: size = 320
+ref: color = '#000'
+ref: text = '你好世界'
+ref: matrix = [618, -36, 0, 585, 128, 150]
 
-const textStyle = computed(() => ({
-  color,
-  fontSize: size * (text.length === 1 ? 0.46 : 0.238) + 'px',
-  paddingBottom: text.length === 1 ? '5%' : null,
-}))
-const imgSrc = computed(() => buffers[text + color])
-let timer
+const fontSize = computed(() => [0, 396, 200, 200, 200][text.length] / 512 * size)
+const font = computed(() => `900 ${fontSize.value}px Noto Serif SC`)
+const transform = computed(() => matrix.map((n, idx) => idx <= 3 ? n / 1000 : n / 512 * size))
 
-watch(textStyle, () => {
-  if (timer) {
-    timer = clearTimeout(timer)
-  }
-  timer = setTimeout(render, 1000)
+let image
+let flag = false
+
+void function () {
+  const img = new Image()
+  img.src = frameUrl
+  img.onload = () => image = img
+}()
+
+onMounted(() => {
+  render()
 })
 
-async function render () {
-  buffers[text + color] = await domToImage.toPng(preview)
+function render () {
+  const {width, height} = canvas
+  const ctx = canvas.getContext('2d')
+
+  ctx.clearRect(0, 0, width, height)
+  ctx.save()
+
+  if (image) {
+    ctx.drawImage(image, 0, 0, width, height)
+  }
+
+  ctx.setTransform(...transform.value)
+  // ctx.fillStyle = '#0f06'
+  // ctx.fillRect(0, 0, width, height)
+  ctx.fillStyle = color
+  ctx.font = font.value
+  switch (text.length) {
+    case 0:
+      break
+    case 1:
+      putText(ctx, text, 'center', width / 2, height / 2)
+      break
+    case 2:
+      putText(ctx, text[0], 'bottom right', width / 2, height / 2)
+      putText(ctx, text[1], 'top left', width / 2, height / 2)
+      break
+    // case 3:
+    //   putText(ctx, text[0], 'bottom right', width / 2, height / 2)
+    //   putText(ctx, text[1], 'bottom left', width / 2, height / 2)
+    //   putText(ctx, text[2], 'top right', width / 2, height / 2)
+    //   break
+    default:
+      putText(ctx, text[0], 'bottom right', width / 2, height / 2)
+      putText(ctx, text[1], 'bottom left', width / 2, height / 2)
+      putText(ctx, text[2], 'top right', width / 2, height / 2)
+      putText(ctx, text[3] || '', 'top left', width / 2, height / 2)
+  }
+  flag = false
+
+  ctx.restore()
+  // imgSrc = canvas.toDataURL()
+  requestAnimationFrame(render)
+}
+
+function debug () {
+  flag = true
+}
+
+function putText (ctx, ch, origin, x, y) {
+  const ox = /left|right/.exec(origin)?.[0] ?? 'center'
+  const oy = /top|bottom/.exec(origin)?.[0] ?? 'center'
+
+  ctx.save()
+  const rx = {
+    left: x,
+    center: x - fontSize.value / 2,
+    right: x - fontSize.value,
+  }[ox]
+  const ry = {
+    top: y,
+    center: y - fontSize.value / 2,
+    bottom: y - fontSize.value,
+  }[oy]
+  // ctx.fillStyle = '#f0f' + [6, 9, 9, 6][text.indexOf(ch) % 4]
+  // ctx.fillRect(rx, ry, fontSize.value, fontSize.value)
+  ctx.restore()
+
+  const {
+    actualBoundingBoxLeft: left,
+    actualBoundingBoxRight: right,
+    actualBoundingBoxAscent: top,
+    actualBoundingBoxDescent: bottom,
+  } = ctx.measureText(ch)
+  const width = left + right
+  const height = top + bottom
+  const fx = rx + left - width / 2 + fontSize.value / 2
+  const fy = ry + top - height / 2 + fontSize.value / 2
+  ctx.fillText(ch, fx, fy)
+
+  if (flag) {
+    // console.log(ch, fx, fy, {width, left, right})
+  }
 }
 </script>
-
-<style scoped>
-.bg-frame {
-  background: url('/src/assets/notion-logo-frame.png') center / 100% no-repeat;
-}
-
-.text-area {
-  /* background: #0f0a; */
-  left: 25%;
-  top: 29.4%;
-  width: 61.68%;
-  height: 58.4%;
-  transform-origin: left top;
-  transform: skewY(-3.3deg);
-}
-</style>

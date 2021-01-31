@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notion Sticker Creator</title>
-    <link rel="stylesheet" href="/fonts.css">
-    <link rel="stylesheet" href="/base.css">
-  </head>
-  <body>
-    <div id="app" class="min-h-screen bg-gray-100 flex flex-col justify-center items-center"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notion Sticker Creator</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&display=swap">
+  <link rel="stylesheet" href="/base.css">
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gray-100 flex flex-col justify-center items-center space-y-10"></div>
+  <script type="module">
+    import {createApp} from 'vue'
+    import App from '/src/app.vue'
+    createApp(App).mount('#app')
+  </script>
+</body>
 </html>
