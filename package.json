@@ -13,10 +13,8 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.7",
-    "autoprefixer": "^10.2.3",
-    "postcss": "^8.2.4",
     "pug": "^3.0.2",
-    "tailwindcss": "^2.0.2",
-    "vite": "^2.1.2"
+    "vite": "^2.1.2",
+    "vite-plugin-windicss": "^0.9.5"
   }
 }

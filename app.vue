@@ -20,6 +20,7 @@ div(class="relative")
 </template>
 
 <script setup>
+import 'virtual:windi.css'
 import {computed, onMounted} from 'vue'
 import frameUrl from '/assets/notion-logo-frame.png'
 
