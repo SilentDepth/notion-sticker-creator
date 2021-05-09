@@ -17,12 +17,26 @@ div(class="relative")
   canvas(ref="canvas" :width="size" :height="size" class="invisible" @click="debug")
   img(:src="imgSrc" class="absolute inset-0 w-full h-full")
 
+component(:is="DEBUG_CONTROL")
 </template>
 
 <script setup>
-import 'virtual:windi.css'
-import {computed, onMounted} from 'vue'
-import frameUrl from '/assets/notion-logo-frame.png'
+import {computed, h, onMounted, reactive} from 'vue'
+
+import frameUrl from './assets/notion-logo-frame.png'
+
+const DEBUG = import.meta.env.PROD ? {} : reactive({
+  stopTransform: true,
+  showRenderArea: true,
+  showCharArea: true,
+})
+const DEBUG_CONTROL = import.meta.env.PROD ? undefined : {
+  render: () => h('div', {class: 'p-4 text-white border border-white rounded flex items-center space-x-4'}, [
+    h('label', {class: 'flex items-center'}, [h('input', {checked: DEBUG.stopTransform, type: 'checkbox', class: 'mr-1.5', onChange: ({target: {checked}}) => DEBUG.stopTransform = checked}), 'Render area']),
+    h('label', {class: 'flex items-center'}, [h('input', {checked: DEBUG.showRenderArea, type: 'checkbox', class: 'mr-1.5', onChange: ({target: {checked}}) => DEBUG.showRenderArea = checked}), 'Render area']),
+    h('label', {class: 'flex items-center'}, [h('input', {checked: DEBUG.showCharArea, type: 'checkbox', class: 'mr-1.5', onChange: ({target: {checked}}) => DEBUG.showCharArea = checked}), 'Char area']),
+  ]),
+}
 
 ref: canvas
 ref: imgSrc
@@ -36,7 +50,6 @@ const font = computed(() => `900 ${fontSize.value}px Noto Serif SC`)
 const transform = computed(() => matrix.map((n, idx) => idx <= 3 ? n / 1000 : n / 512 * size))
 
 let image
-let flag = false
 
 void function () {
   const img = new Image()
@@ -55,13 +68,19 @@ function render () {
   ctx.clearRect(0, 0, width, height)
   ctx.save()
 
-  if (image) {
-    ctx.drawImage(image, 0, 0, width, height)
+  if (import.meta.env.PORD || !DEBUG.stopTransform) {
+    if (image) {
+      ctx.drawImage(image, 0, 0, width, height)
+    }
   }
 
-  ctx.setTransform(...transform.value)
-  // ctx.fillStyle = '#0f06'
-  // ctx.fillRect(0, 0, width, height)
+  if (import.meta.env.PROD || !DEBUG.stopTransform) {
+    ctx.setTransform(...transform.value)
+  }
+  if (import.meta.env.DEV && DEBUG.showRenderArea) {
+    ctx.fillStyle = '#f0f6'
+    ctx.fillRect(0, 0, width, height)
+  }
   ctx.fillStyle = color
   ctx.font = font.value
   switch (text.length) {
@@ -80,15 +99,10 @@ function render () {
       putText(ctx, text[2], 'top right', width / 2, height / 2)
       putText(ctx, text[3] || '', 'top left', width / 2, height / 2)
   }
-  flag = false
 
   ctx.restore()
   imgSrc = canvas.toDataURL()
   requestAnimationFrame(render)
-}
-
-function debug () {
-  flag = true
 }
 
 function putText (ctx, ch, origin, x, y) {
@@ -106,8 +120,10 @@ function putText (ctx, ch, origin, x, y) {
     center: y - fontSize.value / 2,
     bottom: y - fontSize.value,
   }[oy]
-  // ctx.fillStyle = '#f0f' + [6, 9, 9, 6][text.indexOf(ch) % 4]
-  // ctx.fillRect(rx, ry, fontSize.value, fontSize.value)
+  if (import.meta.env.DEV && DEBUG.showCharArea) {
+    ctx.fillStyle = '#0f0' + [6, 9, 9, 6][text.indexOf(ch) % 4]
+    ctx.fillRect(rx, ry, fontSize.value, fontSize.value)
+  }
   ctx.restore()
 
   const {
@@ -122,8 +138,14 @@ function putText (ctx, ch, origin, x, y) {
   const fy = ry + top - height / 2 + fontSize.value / 2
   ctx.fillText(ch, fx, fy)
 
-  if (flag) {
-    // console.log(ch, fx, fy, {width, left, right})
+  if (import.meta.env.DEV && DEBUG.showCharArea) {
+    ctx.save()
+    // ctx.ellipse(fx, fy, 5, 5, 0, 0, 2 * Math.PI)
+    // ctx.closePath()
+    ctx.fillStyle = '#00f8'
+    // ctx.fill()
+    ctx.fillRect(fx - left - top, fy + right + bottom, fontSize.value, fontSize.value)
+    ctx.restore()
   }
 }
 </script>
