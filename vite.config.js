@@ -4,7 +4,7 @@ import windicss from 'vite-plugin-windicss'
 
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({ reactivityTransform: true,}),
     windicss({
       scan: {
         dirs: ['.'],

@@ -38,12 +38,12 @@ const DEBUG_CONTROL = import.meta.env.PROD ? undefined : {
   ]),
 }
 
-ref: canvas
-ref: imgSrc
-ref: size = 320
-ref: color = '#000'
-ref: text = '你好世界'
-ref: matrix = [618, -36, 0, 585, 128, 150]
+let canvas = $ref()
+let imgSrc = $ref()
+let size = $ref(320)
+let color = $ref('#000')
+let text = $ref('你好世界')
+let matrix = $ref([618, -36, 0, 585, 128, 150])
 
 const fontSize = computed(() => [0, 396, 200, 200, 200][text.length] / 512 * size)
 const font = computed(() => `900 ${fontSize.value}px Noto Serif SC`)
