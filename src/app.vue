@@ -149,4 +149,3 @@ div(class="relative")
 
 component(:is="DEBUG_CONTROL")
 </template>
-

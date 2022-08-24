@@ -1,21 +1,20 @@
 {
   "name": "notion-sticker-creator",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "serve": "vite preview"
   },
   "dependencies": {
+    "@unocss/reset": "^0.45.8",
     "dom-to-image": "^2.6.0",
-    "vue": "^3.2.34"
+    "vue": "^3.2.37"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.3.3",
-    "@vue/compiler-sfc": "^3.2.34",
+    "@vitejs/plugin-vue": "^3.0.3",
     "pug": "^3.0.2",
-    "vite": "^2.9.9",
-    "vite-plugin-windicss": "^1.8.4",
-    "windicss": "^3.5.4"
+    "unocss": "^0.45.8",
+    "vite": "^3.0.8"
   }
 }
