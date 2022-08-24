@@ -7,14 +7,14 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@unocss/reset": "^0.45.8",
+    "@unocss/reset": "^0.45.12",
     "dom-to-image": "^2.6.0",
     "vue": "^3.2.37"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
     "pug": "^3.0.2",
-    "unocss": "^0.45.8",
-    "vite": "^3.0.8"
+    "unocss": "^0.45.12",
+    "vite": "^3.0.9"
   }
 }
