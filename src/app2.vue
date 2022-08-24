@@ -16,7 +16,9 @@ function download () {
 
 <template lang="pug">
 div(class="min-h-screen pt-10 bg-black flex flex-col items-center space-y-5")
-  h1(class="text-xl text-white text-center font-bold") Notion 贴纸生成器
+  div(class="text-xl text-white")
+    img(src="/icon.png" class="mx-auto" style="width: 64px; height: 64px;")
+    h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
   p(class="text-neutral-400") 1. 输入内容文本（最多 4 个字符）
   input(v-model="text" type="text" class="box-content w-[4em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
   p(class="text-neutral-400") 2. 预览生成效果（有 Bug 属正常）
