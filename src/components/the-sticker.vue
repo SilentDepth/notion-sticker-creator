@@ -16,8 +16,6 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update'])
-
 const { example } = useFlag()
 
 const SIZE = 512
@@ -31,7 +29,6 @@ async function render () {
     color: example.value ? '#0cf' : props.color,
     frame: !example.value,
   })
-  canvas && emit('update', canvas.toDataURL('image/webp'))
 }
 
 watch([props, example], () => render())
@@ -46,6 +43,10 @@ onMounted(() => {
     beforeRender: ({ font }) => document.fonts.load(font, props.text),
   })
   render()
+})
+
+defineExpose({
+  canvas: $$(canvas),
 })
 </script>
 

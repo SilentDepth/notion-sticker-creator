@@ -2,13 +2,17 @@
 import TheSticker from './components/the-sticker.vue'
 import Tester from './tester.vue'
 
+let sticker = $ref(null)
 let text = $ref('你好世界')
-let dataURI = $ref(null)
 
-function download () {
+/**
+ * @param {string} format
+ */
+function download (format) {
+  console.log(sticker)
   const a = document.createElement('a')
-  a.href = dataURI
-  a.download = 'notion-sticker.webp'
+  a.href = sticker.canvas.toDataURL(`image/${format}`)
+  a.download = `notion-sticker.${format}`
   a.click()
   a.remove()
 }
@@ -24,8 +28,10 @@ div(class="min-h-screen pt-10 bg-black flex flex-col items-center space-y-5")
   p(class="text-neutral-400") 2. 预览生成效果（有 Bug 属正常）
   div(class="relative")
     //img(src="./assets/sticker-3.webp" class="absolute inset-0")
-    TheSticker(:text="text" class="w-[256px] h-[256px]" @update="value => dataURI = value")
-  p(class="text-neutral-400") 3. 点击下载按钮（之后如何使用请自行探索）
-  button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download") 下载 WebP 文件
+    TheSticker(ref="sticker" :text="text" class="w-[256px] h-[256px]")
+  p(class="text-neutral-400") 3. 点击下载按钮（iOS 不支持生成为 WebP）
+  div(class="flex flex-col space-y-5")
+    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download('webp')") 下载 WebP 文件
+    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download('png')") 下载 PNG 文件
   //Tester
 </template>
