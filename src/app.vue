@@ -26,6 +26,6 @@ div(class="min-h-screen pt-10 bg-black flex flex-col items-center space-y-5")
     //img(src="./assets/sticker-3.webp" class="absolute inset-0")
     TheSticker(:text="text" class="w-[256px] h-[256px]" @update="value => dataURI = value")
   p(class="text-neutral-400") 3. 点击下载按钮（之后如何使用请自行探索）
-  button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download") 下载
+  button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download") 下载 WebP 文件
   //Tester
 </template>
