@@ -9,7 +9,6 @@ let text = $ref('你好世界')
  * @param {string} format
  */
 function download (format) {
-  console.log(sticker)
   const a = document.createElement('a')
   a.href = sticker.canvas.toDataURL(`image/${format}`)
   a.download = `notion-sticker.${format}`
