@@ -30,8 +30,8 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     TheSticker(ref="sticker" :text="text" class="w-[256px] h-[256px]")
   p(class="text-neutral-400") 3. 点击下载按钮（iOS 不支持生成为 WebP）
   div(class="flex flex-col space-y-5")
-    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download('webp')") 下载 WebP 文件
-    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded" @click="download('png')") 下载 PNG 文件
+    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded hover:bg-blue-500" @click="download('webp')") 下载 WebP 文件
+    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded hover:bg-blue-500" @click="download('png')") 下载 PNG 文件
   div(class="mt-10!")
     a(href="https://github.com/SilentDepth/notion-sticker-creator" target="_blank" class="text-neutral-400 hover:text-white")
       svg(viewBox='0 0 66 64' width='66' height='64' fill='none' class="w-6 h-6")
