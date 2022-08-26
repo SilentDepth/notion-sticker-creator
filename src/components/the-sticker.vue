@@ -5,6 +5,8 @@ import notionFrameURL from '../assets/notion-logo-frame.png'
 import useFlag from '../stores/flag'
 import { createRenderer, type Renderer } from '../libs/sticker-renderer'
 
+const DEV = import.meta.env.DEV
+
 const props = defineProps({
   text: {
     type: String,
@@ -16,7 +18,7 @@ const props = defineProps({
   },
 })
 
-const { example } = useFlag()
+const { example } = $(useFlag())
 
 const SIZE = 512
 
@@ -25,12 +27,12 @@ let renderer: Renderer
 
 async function render () {
   await renderer?.render(props.text, {
-    color: example.value ? '#0cf' : props.color,
-    frame: !example.value,
+    color: example ? '#0cf' : props.color,
+    frame: !example,
   })
 }
 
-watch([props, example], () => render())
+watch([props, $$(example)], () => render())
 
 onMounted(() => {
   renderer = createRenderer(canvas!, {
@@ -50,5 +52,11 @@ defineExpose({
 </script>
 
 <template lang="pug">
-canvas(ref="canvas" :width="SIZE" :height="SIZE")
+div(class="relative")
+  //img(v-if="example" src="../assets/sticker-4.webp" class="absolute w-[256px] h-[256px]")
+  canvas(ref="canvas" :width="SIZE" :height="SIZE" :class="['w-[256px] h-[256px]', { 'relative mix-blend-difference': example }]")
+  div(v-if="DEV" class="mt-4 text-white")
+    label(class="flex justify-center items-center")
+      input(v-model="example" type="checkbox")
+      span(class="ml-1") Example
 </template>

@@ -19,16 +19,18 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
   div(class="text-xl text-white")
     img(src="/icon.png" class="mx-auto" style="width: 64px; height: 64px;")
     h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
+
   p(class="text-neutral-400") 1. 输入内容文本（最多 4 个字符）
   input(v-model="text" type="text" class="box-content w-[4em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
+
   p(class="text-neutral-400") 2. 预览生成效果（有 Bug 属正常）
-  div(class="relative")
-    //img(src="./assets/sticker-3.webp" class="absolute inset-0")
-    TheSticker(ref="sticker" :text="text" class="w-[256px] h-[256px]")
+  TheSticker(ref="sticker" :text="text")
+
   p(class="text-neutral-400") 3. 点击下载按钮（iOS 不支持生成为 WebP）
   div(class="flex flex-col space-y-5")
     button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded hover:bg-blue-500" @click="download('webp')") 下载 WebP 文件
     button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded hover:bg-blue-500" @click="download('png')") 下载 PNG 文件
+
   div(class="mt-10!")
     a(href="https://github.com/SilentDepth/notion-sticker-creator" target="_blank" class="text-neutral-400 hover:text-white")
       svg(viewBox='0 0 66 64' width='66' height='64' fill='none' class="w-6 h-6")
