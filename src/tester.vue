@@ -1,12 +1,12 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted } from 'vue'
 
-let canvas = $ref(null)
+let canvas = $ref(null as HTMLCanvasElement | null)
 let text = $ref('永')
-let textMetrics = $ref(null)
+let textMetrics = $ref(null as Partial<TextMetrics> | null)
 
 onMounted(async () => {
-  const ctx = canvas.getContext('2d')
+  const ctx = canvas!.getContext('2d')!
   ctx.fillStyle = '#fff'
   ctx.fillRect(0, 0, 200, 200)
 
@@ -25,10 +25,10 @@ onMounted(async () => {
   // ctx.strokeStyle = '#f0f'
   // ctx.stroke(new Path2D(`M 50 ${100 + textMetrics.actualBoundingBoxDescent} h 100`))
   // ctx.stroke(new Path2D(`M 50 ${100 - textMetrics.actualBoundingBoxAscent} h 100`))
-  const actualHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
+  const actualHeight = textMetrics.actualBoundingBoxAscent! + textMetrics.actualBoundingBoxDescent!
   const idealDescent = (actualHeight - 100) / 2
   ctx.fillStyle = '#000'
-  ctx.fillText(text, 100, 150 + idealDescent - textMetrics.actualBoundingBoxDescent)
+  ctx.fillText(text, 100, 150 + idealDescent - textMetrics.actualBoundingBoxDescent!)
 })
 </script>
 

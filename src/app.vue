@@ -1,16 +1,13 @@
-<script setup>
+<script lang="ts" setup>
 import TheSticker from './components/the-sticker.vue'
 import Tester from './tester.vue'
 
-let sticker = $ref(null)
+let sticker = $ref(null as typeof TheSticker | null)
 let text = $ref('你好世界')
 
-/**
- * @param {string} format
- */
-function download (format) {
+function download (format: string) {
   const a = document.createElement('a')
-  a.href = sticker.canvas.toDataURL(`image/${format}`)
+  a.href = sticker!.canvas.toDataURL(`image/${format}`)
   a.download = `notion-sticker.${format}`
   a.click()
   a.remove()

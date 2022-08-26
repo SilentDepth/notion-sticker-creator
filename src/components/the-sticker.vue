@@ -1,9 +1,9 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted, watch } from 'vue'
 
 import notionFrameURL from '../assets/notion-logo-frame.png'
 import useFlag from '../stores/flag'
-import { createRenderer } from '../libs/sticker-renderer'
+import { createRenderer, type Renderer } from '../libs/sticker-renderer'
 
 const props = defineProps({
   text: {
@@ -20,9 +20,8 @@ const { example } = useFlag()
 
 const SIZE = 512
 
-/** @type {HTMLCanvasElement} */
-let canvas = $ref(null)
-let renderer
+let canvas = $ref(null as HTMLCanvasElement | null)
+let renderer: Renderer
 
 async function render () {
   await renderer?.render(props.text, {
@@ -34,7 +33,7 @@ async function render () {
 watch([props, example], () => render())
 
 onMounted(() => {
-  renderer = createRenderer(canvas, {
+  renderer = createRenderer(canvas!, {
     notionFrame: new Promise(resolve => {
       const img = new Image()
       img.src = notionFrameURL
