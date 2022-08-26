@@ -1,5 +1,7 @@
+import type { Canvas, Image } from 'canvas'
+
 interface RendererConfig {
-  notionFrame: HTMLImageElement | Promise<HTMLImageElement>
+  notionFrame: HTMLImageElement | Image | Promise<HTMLImageElement | Image>
   beforeRender?: (data: ParseResult & { options: RenderOptions }) => unknown
 }
 
@@ -16,14 +18,14 @@ interface ParseResult {
   fontSize: number
 }
 
-export function createRenderer (canvas: HTMLCanvasElement, config: RendererConfig) {
+export function createRenderer (canvas: HTMLCanvasElement | Canvas, config: RendererConfig) {
   return new Renderer(canvas, config)
 }
 
 class Renderer {
   ctx: CanvasRenderingContext2D
 
-  constructor (public canvas: HTMLCanvasElement, public config: RendererConfig) {
+  constructor (public canvas: HTMLCanvasElement | Canvas, public config: RendererConfig) {
     this.ctx = canvas.getContext('2d')!
   }
 
