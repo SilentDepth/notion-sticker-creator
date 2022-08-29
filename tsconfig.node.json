@@ -10,8 +10,6 @@
     ]
   },
   "include": [
-    "vite.config.ts",
-    "src/server/**/*.ts",
-    "src/libs/sticker-renderer.ts"
+    "vite.config.ts"
   ]
 }

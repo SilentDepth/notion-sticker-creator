@@ -1,4 +1,4 @@
-import type { Canvas, Image } from 'canvas'
+import type { Canvas, Image, CanvasRenderingContext2D as NodeCanvasRenderingContext2D } from 'canvas'
 
 interface RendererConfig {
   notionFrame: HTMLImageElement | Image | Promise<HTMLImageElement | Image>
@@ -23,10 +23,10 @@ export function createRenderer (canvas: HTMLCanvasElement | Canvas, config: Rend
 }
 
 class Renderer {
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D | NodeCanvasRenderingContext2D
 
   constructor (public canvas: HTMLCanvasElement | Canvas, public config: RendererConfig) {
-    this.ctx = canvas.getContext('2d')!
+    this.ctx = <CanvasRenderingContext2D>canvas.getContext('2d')!
   }
 
   async render (text: string, options?: Partial<RenderOptions>) {
@@ -39,7 +39,7 @@ class Renderer {
     this.ctx.clearRect(0, 0, width, height)
 
     if (optionsResolved.frame) {
-      this.ctx.drawImage(await this.config.notionFrame, 0, 0)
+      this.ctx.drawImage(await <HTMLImageElement>this.config.notionFrame, 0, 0)
     }
 
     this.ctx.save()
