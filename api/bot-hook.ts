@@ -1,0 +1,60 @@
+import type { VercelApiHandler } from '@vercel/node'
+import axios from 'axios'
+
+// Config axios defaults to make life easier
+axios.defaults.baseURL = `https://api.telegram.org/bot${process.env.TG_BOT_TOKEN}/`
+axios.interceptors.response.use(
+  res => res.data.result,
+  err => Promise.reject(err.response.data),
+)
+
+const DRIVE_CHAT_ID = process.env.TG_CHAT_DRIVE
+
+export default <VercelApiHandler>async function (req, res) {
+  // @ts-ignore
+  const protocol = req.socket.encrypted ? 'https' : 'http'
+  const host = req.headers.host
+  const queryID = req.body.inline_query?.id
+  const text = req.body.inline_query?.query
+
+  if (text) {
+    // First, create a webp and upload to Telegram server (by sending file to a "hidden" group)
+    const fileID = await sendSticker(`${protocol}://${host}/api/create?text=${text}&format=webp`)
+    // Then, "forward" the uploaded webp to user as inline query result
+    // This is the only way we found which is possible to send a sticker via an inline bot
+    await axios.post('answerInlineQuery', {
+      inline_query_id: queryID,
+      results: [{
+        type: 'sticker',
+        id: text,
+        sticker_file_id: fileID,
+      }],
+    })
+    // TODO: Remove the uploaded webp to save storage for Telegram
+  }
+
+  // We don't need to send anything back to Telegram
+  res.status(204).end()
+}
+
+async function sendSticker (url: string) {
+  const message = await axios.post<any, TgMessage<'sticker'>>('sendSticker', {
+    chat_id: DRIVE_CHAT_ID,
+    sticker: url,
+  })
+  return message.sticker.file_id
+}
+
+type TgMessage<T> = {
+  message_id: number
+  // We don't need other properties
+  // ...
+} & (
+  T extends 'sticker' ? { sticker: TgSticker } : {}
+)
+
+interface TgSticker {
+  file_id: string
+  // We don't need other properties
+  // ...
+}
