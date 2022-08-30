@@ -13,7 +13,7 @@ fs.readFile(path.resolve(process.cwd(), 'src/assets/notion-logo-frame.png'), () 
 const FONT_URL = 'https://raw.githubusercontent.com/googlefonts/noto-cjk/main/Serif/SubsetOTF/SC/NotoSerifSC-Bold.otf'
 const FONT_FILENAME = 'NotoSerifSC-Bold.otf'
 
-type Format = 'png' | 'webp'
+type Format = 'png' | 'jpeg' | 'webp'
 
 export default <VercelApiHandler>async function (req, res) {
   // Download the font since it's too big to bundle for Vercel
@@ -40,20 +40,24 @@ export default <VercelApiHandler>async function (req, res) {
     notionFrame: loadImage(path.resolve(process.cwd(), 'src/assets/notion-logo-frame.png')),
   })
   await renderer.render(text)
-  const buffer = canvas.toBuffer('image/png')
 
   switch (format) {
     case 'png':
       res
         .setHeader('Content-Type', 'image/png')
-        .send(buffer)
+        .send(canvas.toBuffer('image/png'))
+      break
+    case 'jpeg':
+      res
+        .setHeader('Content-Type', 'image/jpeg')
+        .send(canvas.toBuffer('image/jpeg'))
       break
     case 'webp':
       axios.post(
         // It might be a TLSSocket?
         // @ts-ignore
         `${req.socket.encrypted ? 'https': 'http'}://${req.headers.host}/api/webp`,
-        buffer.toString('base64'),
+        canvas.toBuffer('image/png').toString('base64'),
         {
           responseType: 'arraybuffer',
           headers: { 'Content-Type': 'text/plain' },
