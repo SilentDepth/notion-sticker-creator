@@ -7,19 +7,19 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@unocss/reset": "^0.45.12",
+    "@unocss/reset": "^0.45.15",
     "axios": "^0.27.2",
-    "canvas": "^2.9.3",
-    "vue": "^3.2.37"
+    "canvas": "^2.10.0",
+    "vue": "^3.2.38"
   },
   "devDependencies": {
     "@types/node": "^16.0.0",
-    "@vercel/node": "^2.5.11",
+    "@vercel/node": "^2.5.13",
     "@vitejs/plugin-vue": "^3.0.3",
     "pug": "^3.0.2",
     "typescript": "^4.8.2",
-    "unocss": "^0.45.12",
+    "unocss": "^0.45.15",
     "vite": "^3.0.9",
-    "vue-tsc": "^0.40.1"
+    "vue-tsc": "^0.40.6"
   }
 }
