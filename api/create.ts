@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import type { VercelApiHandler } from '@vercel/node'
 import { createCanvas, loadImage, registerFont } from 'canvas'
+import '../libs/node-canvas-webp'
 import axios from 'axios'
 
 import { createRenderer } from '../src/libs/sticker-renderer'
@@ -14,6 +15,7 @@ const FONT_URL = 'https://raw.githubusercontent.com/googlefonts/noto-cjk/main/Se
 const FONT_FILENAME = 'NotoSerifSC-Bold.otf'
 
 type Format = 'png' | 'jpeg' | 'webp'
+type MIME = `image/${Format}`
 
 export default <VercelApiHandler>async function (req, res) {
   // Download the font since it's too big to bundle for Vercel
@@ -41,36 +43,10 @@ export default <VercelApiHandler>async function (req, res) {
   })
   await renderer.render(text)
 
-  switch (format) {
-    case 'png':
-      res
-        .setHeader('Content-Type', 'image/png')
-        .send(canvas.toBuffer('image/png'))
-      break
-    case 'jpeg':
-      res
-        .setHeader('Content-Type', 'image/jpeg')
-        .send(canvas.toBuffer('image/jpeg'))
-      break
-    case 'webp':
-      axios.post(
-        // It might be a TLSSocket?
-        // @ts-ignore
-        `${req.socket.encrypted ? 'https': 'http'}://${req.headers.host}/api/webp`,
-        canvas.toBuffer('image/png').toString('base64'),
-        {
-          responseType: 'arraybuffer',
-          headers: { 'Content-Type': 'text/plain' },
-        },
-      ).then(({ data }) => {
-        res
-          .setHeader('Content-Type', 'image/webp')
-          .send(data)
-      })
-      break
-    default:
-      res
-        .status(400)
-        .end()
-  }
+  const mime: MIME = `image/${format}`
+  res
+    .setHeader('Content-Type', mime)
+    // FIXME: Not sure why
+    // @ts-ignore
+    .send(canvas.toBuffer(mime))
 }
