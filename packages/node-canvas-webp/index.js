@@ -6,7 +6,7 @@
  */
 
 const canvasModule = require('canvas')
-const webp = require('./canvaswebp.node').canvasToBufferWebp
+const webp = process.env.NODE_ENV === 'development' ? () => {} : require('./canvaswebp.node').canvasToBufferWebp
 
 // 1.x : 2.x
 const Canvas = typeof canvasModule === 'function' ? canvasModule : canvasModule.Canvas

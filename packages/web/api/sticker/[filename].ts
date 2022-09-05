@@ -11,6 +11,8 @@ import { createRenderer } from '@notion-sticker-creator/core'
 const FONT_URL = 'https://raw.githubusercontent.com/googlefonts/noto-cjk/main/Serif/SubsetOTF/SC/NotoSerifSC-Bold.otf'
 const FONT_FILENAME = 'NotoSerifSC-Bold.otf'
 
+const notionFrame = loadImage(path.resolve(__dirname, '../../src/assets/notion-logo-frame.png'))
+
 type Format = 'png' | 'jpeg' | 'webp'
 type MIME = `image/${Format}`
 
@@ -29,14 +31,11 @@ export default <VercelApiHandler>async function (req, res) {
     weight: '700',
   })
 
-  const { text, format } = req.query as {
-    text: string
-    format: Format
-  }
+  const [text, format] = (req.query.filename as string).split('.') as [string, Format]
 
   const canvas = createCanvas(512, 512)
   const renderer = createRenderer(canvas, {
-    notionFrame: loadImage(path.resolve(__dirname, '../src/assets/notion-logo-frame.png')),
+    notionFrame,
   })
   await renderer.render(text)
 
