@@ -1,7 +1,7 @@
-<center>
+<div align="center">
 <img src="./packages/web/public/icon.png" width="128">
-<h1>Notion 贴纸生成器</h1>
-</center>
+<h3>Notion 贴纸生成器</h3>
+</div>
 
 ---
 
