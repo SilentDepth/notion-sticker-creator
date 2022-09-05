@@ -1,5 +1,5 @@
 {
-  "name": "notion-sticker-creator",
+  "name": "@notion-sticker-creator/web",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite --host",
@@ -7,6 +7,8 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@notion-sticker-creator/canvas-webp": "workspace:*",
+    "@notion-sticker-creator/core": "workspace:*",
     "@unocss/reset": "^0.45.15",
     "axios": "^0.27.2",
     "canvas": "^2.10.0",

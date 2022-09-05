@@ -3,7 +3,7 @@ import { onMounted, watch } from 'vue'
 
 import notionFrameURL from '../assets/notion-logo-frame.png'
 import useFlag from '../stores/flag'
-import { createRenderer, type Renderer } from '../libs/sticker-renderer'
+import { createRenderer, type Renderer } from '@notion-sticker-creator/core'
 
 const DEV = import.meta.env.DEV
 

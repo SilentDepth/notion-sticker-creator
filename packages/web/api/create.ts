@@ -3,13 +3,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import type { VercelApiHandler } from '@vercel/node'
 import { createCanvas, loadImage, registerFont } from 'canvas'
-import '../libs/node-canvas-webp'
 import axios from 'axios'
+import '@notion-sticker-creator/canvas-webp'
 
-import { createRenderer } from '../src/libs/sticker-renderer'
-
-// Make Vercel static analyser happy
-fs.readFile(path.resolve(process.cwd(), 'src/assets/notion-logo-frame.png'), () => {})
+import { createRenderer } from '@notion-sticker-creator/core'
 
 const FONT_URL = 'https://raw.githubusercontent.com/googlefonts/noto-cjk/main/Serif/SubsetOTF/SC/NotoSerifSC-Bold.otf'
 const FONT_FILENAME = 'NotoSerifSC-Bold.otf'
@@ -39,7 +36,7 @@ export default <VercelApiHandler>async function (req, res) {
 
   const canvas = createCanvas(512, 512)
   const renderer = createRenderer(canvas, {
-    notionFrame: loadImage(path.resolve(process.cwd(), 'src/assets/notion-logo-frame.png')),
+    notionFrame: loadImage(path.resolve(__dirname, '../src/assets/notion-logo-frame.png')),
   })
   await renderer.render(text)
 
