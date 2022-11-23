@@ -48,7 +48,7 @@ export default <VercelApiHandler>async function (req, res) {
   await renderer.render(text)
   end('render')
 
-  console.log({ profile: 'sticker', argument: text, ...result() })
+  console.log({ profile: 'sticker', query: text, ...result() })
 
   const mime: MIME = `image/${format}`
   res

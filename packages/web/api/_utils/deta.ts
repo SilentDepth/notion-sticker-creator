@@ -6,9 +6,6 @@ const client = axios.create({
     'x-api-key': process.env.DETA_PROJECT_KEY!,
   },
 })
-client.interceptors.response.use(
-  res => res.data,
-  err => Promise.reject(err.response.data),
-)
+client.interceptors.response.use(res => res.data)
 
 export default client

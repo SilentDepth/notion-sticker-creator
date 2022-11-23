@@ -10,13 +10,16 @@ export default <VercelApiHandler>async function (req, res) {
   const { start, end, result } = profiler()
 
   const queryID = req.body.inline_query?.id
-  const text = req.body.inline_query?.query
+  const text = req.body.inline_query?.query.slice(0, 4)
 
   if (text) {
     let stickerFileID: string
 
+    // Check if an identical sticker has been generated before
     start('check-cache')
-    const cached = await deta.get<never, CacheItem | null>(`stickers/items/${text}`).catch(() => null)
+    const cached = await deta.get<never, CacheItem | null>(`stickers/items/${encodeURIComponent(text)}`)
+      // 404 is considered a normal response which means no cache found
+      .catch(err => err.response.status === 404 ? null : Promise.reject(err))
     end('check-cache')
 
     if (cached) {
@@ -47,6 +50,7 @@ export default <VercelApiHandler>async function (req, res) {
         })
         end('answer-inline-query')
       })(),
+      // If no cache found, insert one into cache database
       (async () => {
         if (cached) return
         start('insert-cache')
@@ -57,7 +61,7 @@ export default <VercelApiHandler>async function (req, res) {
       })(),
     ])
 
-    console.log({ profile: 'hook', argument: text, ...result() })
+    console.log({ profile: 'hook', query: req.body.inline_query?.query, ...result() })
   }
 
   // We don't need to send anything back to Telegram
