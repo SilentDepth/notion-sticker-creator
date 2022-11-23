@@ -4,7 +4,8 @@
   "type": "commonjs",
   "main": "index.js",
   "types": "index.d.ts",
+  "packageManager": "pnpm@7.17.0",
   "dependencies": {
-    "canvas": "^2.10.0"
+    "canvas": "^2.10.2"
   }
 }
