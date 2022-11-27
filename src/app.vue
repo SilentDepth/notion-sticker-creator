@@ -1,9 +1,20 @@
 <script lang="ts" setup>
+import { watch } from 'vue'
+
 import NotionSticker from './components/notion-sticker.vue'
+import ColorInput from './components/color-input.vue'
+import AsyncButton from './components/async-button.vue'
 
 let sticker = $ref<typeof NotionSticker>()
 let text = $ref('你好世界')
-let color = $ref('#000000')
+let colors = $ref(['#000000'])
+let multiColor = $ref(false)
+
+watch($$(multiColor), value => {
+  if (!value) {
+    colors.splice(1, Infinity)
+  }
+})
 
 function generateCanvas ($svg: SVGSVGElement) {
   const $image = $svg.querySelector('image')!
@@ -34,15 +45,15 @@ function download (format: string) {
   a.remove()
 }
 
-let copied = $ref(false)
-
 async function copy (format: string) {
   const type = `image/${format}`
   const blob = await new Promise<Blob>(resolve => generateCanvas(sticker!.$el.querySelector('svg')).toBlob(resolve, type))
   const data = [new ClipboardItem({ [type]: blob })]
   await navigator.clipboard.write(data)
-  copied = true
-  setTimeout(() => copied = false, 2000)
+}
+
+async function copyCommand () {
+  await navigator.clipboard.writeText(`@NotionStickerBot ${text} ${colors.join(',').replaceAll('#000000', '')}`)
 }
 </script>
 
@@ -52,32 +63,42 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     img(src="/icon.png" class="mx-auto" style="width: 64px; height: 64px;")
     h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
 
-  p(class="text-neutral-400") 1. 输入文本并选择颜色（最多 4 个字符）
-  div(class="flex gap-2")
-    input(v-model="text" type="text" class="flex-none box-content w-[4em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
-    div(class="flex-none w-10 border border-neutral-600 rounded cursor-pointer relative" :style="{ backgroundColor: color }")
-      input(v-model="color" type="color" class="absolute inset-0 w-full h-full opacity-0")
+  div(class="py-5 sticky top-0")
+    NotionSticker(ref="sticker" :text="text" :color="colors.join(',')" style="width: 256px; height: 256px;")
 
-  p(class="text-neutral-400") 2. 预览生成效果（有 Bug 属正常）
-  NotionSticker(ref="sticker" :text="text" :color="color" style="width: 256px; height: 256px;")
+  p(class="text-neutral-400") 1. 输入贴纸文字（最多 4 个字符）
+  input(v-model="text" type="text" class="flex-none box-content w-[4em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
+
+  p(class="text-neutral-400") 2. 设置文字颜色
+  div(class="grid grid-rows-[40px] grid-cols-[repeat(4,40px)] gap-px")
+    ColorInput(v-model="colors[0]" :class="['border border-neutral-600', multiColor ? 'rounded-l' : 'rounded', { 'col-span-full': !multiColor }]")
+    ColorInput(v-show="multiColor" v-model="colors[1]" class="border border-neutral-600")
+    ColorInput(v-show="multiColor" v-model="colors[2]" class="border border-neutral-600")
+    ColorInput(v-show="multiColor" v-model="colors[3]" class="border border-neutral-600 rounded-r")
+  label(class="mt-2! flex items-center")
+    input(v-model="multiColor" type="checkbox" class="mr-2")
+    span(class="text-neutral-200") 分别设置颜色
 
   p(class="text-neutral-400") 3. 获取图像（iOS 不支持生成为 WebP）
   div(class="grid grid-cols-[auto_1fr_1fr] items-center gap-y-5")
     span(class="mr-4 text-neutral-200") PNG 格式
-    button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded-l hover:bg-blue-500 mr-px" @click="download('png')") 下载
-    button(type="button" class="flex-none px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded-r hover:bg-blue-500 relative" @click="copy('png')")
-      span(:class="['transition duration-200', { 'opacity-0': copied }]") 复制
-      transition(
-        enter-from-class="opacity-0 scale-0"
-        leave-to-class="opacity-0"
-        enter-active-class="transition duration-200 ease-in-out"
-        leave-active-class="transition duration-200 ease-in-out"
-      )
-        svg(v-show="copied" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 absolute inset-0 m-auto")
+    button(type="button" class="px-[1em] py-[0.25em] bg-blue-600 text-white rounded-l hover:bg-blue-500 mr-px" @click="download('png')") 下载
+    AsyncButton(type="button" class="flex-none px-[1em] py-[0.25em] bg-blue-600 text-white rounded-r hover:bg-blue-500" @click="copy('png')")
+      template(#default="{ done }")
+        span(:class="['transition duration-200', { 'opacity-0': done }]") 复制
+      template(#async)
+        svg(viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 absolute inset-0 m-auto")
           path(d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z")
     span(class="mr-4 text-neutral-200") WebP 格式
-    button(type="button" class="col-span-2 px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded hover:bg-blue-500 mr-px" @click="download('webp')") 下载
-    //- button(type="button" class="px-[1em] py-[0.25em] text-lg bg-blue-600 text-white rounded-r hover:bg-blue-500" @click="copy('webp')") 复制
+    button(type="button" class="col-span-2 px-[1em] py-[0.25em] bg-blue-600 text-white rounded hover:bg-blue-500 mr-px" @click="download('webp')") 下载
+    //- button(type="button" class="px-[1em] py-[0.25em] bg-blue-600 text-white rounded-r hover:bg-blue-500" @click="copy('webp')") 复制
+    span(class="mr-4 text-neutral-200") Bot 命令
+    AsyncButton(type="button" class="col-span-2 px-[1em] py-[0.25em] bg-blue-600 text-white rounded hover:bg-blue-500" @click="copyCommand")
+      template(#default="{ done }")
+        span(:class="['transition duration-200', { 'opacity-0': done }]") 复制
+      template(#async)
+        svg(viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 absolute inset-0 m-auto")
+          path(d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z")
 
   div(class="mt-10!")
     a(href="https://github.com/SilentDepth/notion-sticker-creator" target="_blank" class="text-neutral-400 hover:text-white")
