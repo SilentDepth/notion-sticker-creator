@@ -30,7 +30,7 @@ export default <VercelApiHandler>async function (req, res) {
       start('send-sticker')
       const message = await telegram.post<never, TgMessage<'sticker'>>('sendSticker', {
         chat_id: DRIVE_CHAT_ID,
-        sticker: `https://${process.env.VERCEL_URL}/api/sticker/${encodeURIComponent(text)}.webp?color=${color}`,
+        sticker: `https://${process.env.VERCEL_URL}/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(color)}`,
       })
       stickerFileID = message.sticker.file_id
       end('send-sticker')
