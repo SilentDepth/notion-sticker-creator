@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./packages/web/public/icon.png" width="128">
+<img src="public/icon.png" width="128">
 <h3>Notion 贴纸生成器</h3>
 </div>
 

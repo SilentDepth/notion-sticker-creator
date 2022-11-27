@@ -1,7 +1,28 @@
 {
-  "references": [
-    { "path": "packages/core/tsconfig.json" },
-    { "path": "packages/web/tsconfig.json" },
-    { "path": "packages/web/tsconfig.node.json" }
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "sourceMap": true,
+    "useDefineForClassFields": true,
+    "skipLibCheck": true,
+    "types": [
+      "vite/client",
+      "vue/macros-global"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.d.ts",
+    "**/*.vue"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

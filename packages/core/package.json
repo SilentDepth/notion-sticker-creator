@@ -1,9 +1,0 @@
-{
-  "name": "@notion-sticker-creator/core",
-  "version": "1.0.0",
-  "module": "index.ts",
-  "packageManager": "pnpm@7.17.0",
-  "devDependencies": {
-    "canvas": "^2.10.2"
-  }
-}
