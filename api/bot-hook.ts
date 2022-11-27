@@ -56,7 +56,7 @@ export default <VercelApiHandler>async function (req, res) {
         if (cached) return
         start('insert-cache')
         await deta.post(`stickers/items`, {
-          item: { key: text, sticker_file_id: stickerFileID },
+          item: { key: `${text} ${color}`, sticker_file_id: stickerFileID },
         })
         end('insert-cache')
       })(),
