@@ -8,6 +8,7 @@ interface OptionsInit {
   size: number
   color: string
   params: Partial<Params>
+  debug: boolean
 }
 
 interface OptionsResolved {
@@ -38,7 +39,7 @@ export default async function render (text: string, optionsInit?: Partial<Option
     color: options.colors[idx],
   }))
   return await satori(
-    parse(items, await assets, resolveParams(items.length, options.params)),
+    parse(items, await assets, resolveParams(items.length, options.params), optionsInit?.debug),
     {
       width: options.size,
       height: options.size,
@@ -78,6 +79,7 @@ function parse (
   graphemes: Array<{ value: string, color?: string }>,
   assets: { frame: string },
   { fontSize, lineHeight, translate, skewY }: Params,
+  debug?: boolean,
 ): any {
   const BLANK = { value: ' ' }
   switch (graphemes.length) {
@@ -92,34 +94,57 @@ function parse (
     default:
       graphemes = graphemes.slice(0, 4)
   }
+  return h(
+    'div',
+    { style: style`width: 100%; height: 100%; display: flex; justify-content: center; align-items: center` },
+    [
+      h('img', {
+        src: assets.frame,
+        width: '100%',
+        height: '100%',
+        style: style`position: absolute; top: 0; left: 0`,
+      }),
+      h(
+        'div',
+        { style: style`width: 2em; font-size: ${fontSize}px; line-height: ${lineHeight}px; transform: translate(${translate[0]}px, ${translate[1]}px) skewY(${Math.atan(skewY)}rad); display: flex; flex-wrap: wrap` },
+        graphemes.map(grapheme => h(
+          'span',
+          { style: style`width: 1em; height: 1em; color: ${grapheme.color || '#000'}; display: flex; justify-content: center; box-shadow: ${debug ? '0 0 0 1px #f0f' : 'none'}` },
+          grapheme.value),
+        ),
+      ),
+    ],
+  )
+}
+
+interface SatoriNode {
+  type: string
+  props: Record<string, any>
+}
+
+function h (type: string, props: Record<string, any>, children?: string | SatoriNode | Array<string | SatoriNode>): SatoriNode {
   return {
-    type: 'div',
+    type,
     props: {
-      style: { width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' },
-      children: [
-        {
-          type: 'img',
-          props: {
-            src: assets.frame,
-            width: '100%',
-            height: '100%',
-            style: { position: 'absolute', top: 0, left: 0 },
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: { width: '2em', fontSize: fontSize + 'px', lineHeight: lineHeight + 'px', wordBreak: 'break-all', transform: `translate(${translate.map(n => n + 'px').join(',')}) skewY(${Math.atan(skewY)}rad)`, display: 'flex', flexWrap: 'wrap' },
-            children: graphemes.map(grapheme => ({
-              type: 'span',
-              props: {
-                style: { color: grapheme.color || '#000' },
-                children: grapheme.value,
-              },
-            })),
-          },
-        },
-      ],
+      ...props,
+      children,
     },
   }
+}
+
+function style (segments: TemplateStringsArray, ...interpolations: any[]): Record<string, string | number> {
+  const raw = segments.slice(0, -1).map((s, idx) => [s, interpolations[idx]]).flat(1).concat(segments.at(-1)).join('')
+  return Object.fromEntries(
+    raw
+      .split(/\s*;\s*/)
+      .filter(Boolean)
+      .map(rule => {
+        const [prop, value] = rule.split(/\s*:\s*/)
+        return [camelCase(prop), value]
+      })
+  )
+}
+
+function camelCase (str: string): string {
+  return str.replaceAll(/-\w/g, match => match[1].toUpperCase())
 }

@@ -55,7 +55,14 @@ div(class="min-h-screen bg-gray-800 text-gray-400 flex flex-col justify-center i
   div(class="flex items-start gap-1")
     div(class="relative" @click="diff = !diff")
       img(v-show="diff" :src="example" class="absolute z-0")
-      NotionSticker(ref="sticker" :text="text" color=",,,goldenrod" :params="diff ? params : undefined" :class="{ 'mix-blend-difference': diff }")
+      NotionSticker(
+        ref="sticker"
+        :text="text"
+        :color="diff ? '#f0f' : undefined"
+        :params="diff ? params : undefined"
+        debug
+        :class="{ 'mix-blend-difference': diff }"
+      )
     canvas(ref="canvas" width="512" height="512")
   input(v-model="text" type="text")
   div(class="flex items-start gap-2")

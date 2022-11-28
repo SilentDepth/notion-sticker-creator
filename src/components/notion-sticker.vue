@@ -20,6 +20,10 @@ const props = defineProps({
     type: Object,
     default: undefined,
   },
+  debug: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 let svg = $ref('')
@@ -29,6 +33,7 @@ watch(props, async props => {
     size: props.size,
     color: props.color,
     params: props.params,
+    debug: props.debug,
   })
 }, { immediate: true })
 </script>
