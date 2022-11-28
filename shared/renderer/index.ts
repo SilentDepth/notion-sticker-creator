@@ -13,7 +13,7 @@ export default async function render (text, optionsInit?) {
   const options = resolveOptions(optionsInit)
 
   // At the moment, Firefox doesn't support Intl.Segmenter yet.
-  const graphemes = Intl.Segmenter ? [...new Intl.Segmenter().segment(text)] : text.split('')
+  const graphemes = Intl.Segmenter ? [...new Intl.Segmenter().segment(text)] : text.split('').map(s => ({ segment: s }))
   const items = graphemes.map((it, idx) => ({
     value: it.segment,
     color: options.colors[idx],
