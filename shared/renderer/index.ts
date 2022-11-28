@@ -4,12 +4,31 @@ import loadAssets from './load-assets'
 
 const assets = loadAssets()
 
+interface OptionsInit {
+  size: number
+  color: string
+  params: Partial<Params>
+}
+
+interface OptionsResolved {
+  size: number
+  colors: string[]
+  params?: Partial<Params>
+}
+
+interface Params {
+  fontSize: number
+  lineHeight: number
+  translate: [number, number]
+  skewY: number
+}
+
 /**
  * @param text        - Text to render inside sticker frame
  * @param optionsInit - Currently only color is supported
  * @returns The sticker in SVG format
  */
-export default async function render (text, optionsInit?) {
+export default async function render (text: string, optionsInit?: Partial<OptionsInit>) {
   const options = resolveOptions(optionsInit)
 
   // At the moment, Firefox doesn't support Intl.Segmenter yet.
@@ -19,7 +38,7 @@ export default async function render (text, optionsInit?) {
     color: options.colors[idx],
   }))
   return await satori(
-    parse(items, await assets, options.params ?? resolveParams(items.length)),
+    parse(items, await assets, resolveParams(items.length, options.params)),
     {
       width: options.size,
       height: options.size,
@@ -30,9 +49,9 @@ export default async function render (text, optionsInit?) {
   )
 }
 
-function resolveOptions (optionsInit) {
+function resolveOptions (optionsInit?: Partial<OptionsInit>): OptionsResolved {
   const colors = (() => (optionsInit?.color || '').includes(',')
-    ? optionsInit.color.split(',')
+    ? optionsInit?.color?.split(',') ?? []
     : new Array(4).fill(optionsInit?.color)
   )()
   return {
@@ -42,17 +61,24 @@ function resolveOptions (optionsInit) {
   }
 }
 
-function resolveParams (graphemeCount: number) {
+function resolveParams (graphemeCount: number, params?: Partial<Params>): Params {
+  let defaultParams: Params
   switch (graphemeCount) {
     case 0:
     case 1:
-      return { fontSize: 238, lineHeight: 100, translate: [147, 31], skewY: -0.07 }
+      defaultParams = { fontSize: 238, lineHeight: 100, translate: [147, 31], skewY: -0.07 }
+      break
     default:
-      return { fontSize: 124, lineHeight: 100, translate: [34, 41], skewY: -0.075 }
+      defaultParams = { fontSize: 124, lineHeight: 100, translate: [34, 41], skewY: -0.075 }
   }
+  return { ...defaultParams, ...params }
 }
 
-function parse (graphemes, assets, { fontSize, lineHeight, translate, skewY }) {
+function parse (
+  graphemes: Array<{ value: string, color?: string }>,
+  assets: { frame: string },
+  { fontSize, lineHeight, translate, skewY }: Params,
+): any {
   const BLANK = { value: ' ' }
   switch (graphemes.length) {
     case 0:
