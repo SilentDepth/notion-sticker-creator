@@ -10,7 +10,7 @@ export default <VercelApiHandler>async function (req, res) {
   const [text, format] = (req.query.filename as string).split('.') as [string, keyof FormatEnum]
 
   start('render')
-  const svg = await render(text, { color: req.query.color })
+  const svg = await render(text, { color: req.query.color as string })
   end('render')
 
   switch (format) {

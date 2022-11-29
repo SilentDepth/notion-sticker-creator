@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { watch } from 'vue'
 
-import sticker from '../../shared/renderer'
+import render from '../../shared/renderer'
 
 const props = defineProps({
   text: {
@@ -29,7 +29,7 @@ const props = defineProps({
 let svg = $ref('')
 
 watch(props, async props => {
-  svg = await sticker(props.text, {
+  svg = await render(props.text, {
     size: props.size,
     color: props.color,
     params: props.params,

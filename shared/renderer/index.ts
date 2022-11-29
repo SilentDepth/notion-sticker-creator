@@ -18,10 +18,10 @@ interface OptionsResolved {
 }
 
 interface Params {
-  fontSize: number
-  lineHeight: number
-  translate: [number, number]
-  skewY: number
+  /** Text region padding in em. Default to 0.25em */
+  padding: number
+  /** Text baseline offset in em. Default to 17/238em*/
+  offset: number
 }
 
 /**
@@ -50,10 +50,12 @@ export default async function render (text: string, optionsInit?: Partial<Option
   )
 }
 
+const MAX = 9
+
 function resolveOptions (optionsInit?: Partial<OptionsInit>): OptionsResolved {
   const colors = (() => (optionsInit?.color || '').includes(',')
     ? optionsInit?.color?.split(',') ?? []
-    : new Array(4).fill(optionsInit?.color)
+    : new Array(MAX).fill(optionsInit?.color)
   )()
   return {
     size: optionsInit?.size ?? 512,
@@ -63,42 +65,62 @@ function resolveOptions (optionsInit?: Partial<OptionsInit>): OptionsResolved {
 }
 
 function resolveParams (graphemeCount: number, params?: Partial<Params>): Params {
-  let defaultParams: Params
-  switch (graphemeCount) {
-    case 0:
-    case 1:
-      defaultParams = { fontSize: 238, lineHeight: 100, translate: [147, 31], skewY: -0.07 }
-      break
-    default:
-      defaultParams = { fontSize: 124, lineHeight: 100, translate: [34, 41], skewY: -0.075 }
+  return {
+    padding: 0.25,
+    offset: 17 / 238,
+    ...params,
   }
-  return { ...defaultParams, ...params }
 }
+
+const BLANK = { value: '' }
 
 function parse (
   graphemes: Array<{ value: string, color?: string }>,
   assets: { frame: string },
-  { fontSize, lineHeight, translate, skewY }: Params,
+  { padding, offset }: Params,
   debug?: boolean,
-): any {
-  const BLANK = { value: ' ' }
+): SatoriNode {
   switch (graphemes.length) {
     case 0:
+      graphemes = [BLANK]
+      break
     case 1:
-    case 3:
-    case 4:
       break
     case 2:
       graphemes.splice(1, 0, BLANK, BLANK)
       break
+    case 3:
+      graphemes.push(BLANK)
+      break
+    case 4:
+      break
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      graphemes.push(...new Array(MAX - graphemes.length).fill(BLANK))
+      break
+    case 9:
+      break
     default:
-      graphemes = graphemes.slice(0, 4)
+      graphemes = graphemes.slice(0, MAX)
   }
+
+  const groupSize = Math.ceil(Math.sqrt(graphemes.length))
+  const groups = graphemes.reduce<any[][]>((groups, grapheme, idx) => {
+    if (idx % groupSize === 0) {
+      groups.unshift([])
+    }
+    groups[0].push(grapheme)
+    return groups
+  }, []).reverse()
+  const fontSize = 316 / (groupSize + padding * 2)
+
   return h(
     'div',
-    { style: style`width: 100%; height: 100%; display: flex; justify-content: center; align-items: center` },
+    { style: style`display: flex; width: 100%; height: 100%` },
     [
-      h('img', {
+      debug ? null : h('img', {
         src: assets.frame,
         width: '100%',
         height: '100%',
@@ -106,12 +128,12 @@ function parse (
       }),
       h(
         'div',
-        { style: style`width: 2em; font-size: ${fontSize}px; line-height: ${lineHeight}px; transform: translate(${translate[0]}px, ${translate[1]}px) skewY(${Math.atan(skewY)}rad); display: flex; flex-wrap: wrap` },
-        graphemes.map(grapheme => h(
-          'span',
-          { style: style`width: 1em; height: 1em; color: ${grapheme.color || '#000'}; display: flex; justify-content: center; box-shadow: ${debug ? '0 0 0 1px #f0f' : 'none'}` },
-          grapheme.value),
-        ),
+        { style: style`display: flex; flex-direction: column; justify-content: center; align-items: center; width: 316px; height: 316px; font-size: ${fontSize}px; line-height: 1em; ${debug ? '' : `transform: translate(128px, 151px) scaleY(0.943) skewY(-3.52deg)`}; transform-origin: top left; ${debug ? 'background-color: #fff' : ''}` },
+        groups.map(group => {
+          return h('div', { style: style`display: flex` }, group.map(grapheme => {
+            return h('span', { style: style`display: flex; justify-content: center; width: 1em; height: 1em; color: ${grapheme.color || '#000'}; ${debug ? 'box-shadow: 0 0 0 1px #f0f' : ''}` }, h('span', { style: style`transform: translateY(${-1 * fontSize * offset}px)` }, grapheme.value))
+          }))
+        }),
       ),
     ],
   )
@@ -122,7 +144,7 @@ interface SatoriNode {
   props: Record<string, any>
 }
 
-function h (type: string, props: Record<string, any>, children?: string | SatoriNode | Array<string | SatoriNode>): SatoriNode {
+function h (type: string, props?: Record<string, any>, children?: null | string | SatoriNode | Array<null | string | SatoriNode>): SatoriNode {
   return {
     type,
     props: {
@@ -136,10 +158,10 @@ function style (segments: TemplateStringsArray, ...interpolations: any[]): Recor
   const raw = segments.slice(0, -1).map((s, idx) => [s, interpolations[idx]]).flat(1).concat(segments.at(-1)).join('')
   return Object.fromEntries(
     raw
-      .split(/\s*;\s*/)
+      .split(/\s*;(?!base64)\s*/)
       .filter(Boolean)
       .map(rule => {
-        const [prop, value] = rule.split(/\s*:\s*/)
+        const [prop, value] = rule.split(/(?<=^[\w-]+)\s*:\s*/)
         return [camelCase(prop), value]
       })
   )

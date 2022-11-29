@@ -5,14 +5,25 @@ import NotionSticker from './components/notion-sticker.vue'
 import ColorInput from './components/color-input.vue'
 import AsyncButton from './components/async-button.vue'
 
+const MAX = 9
+
 let sticker = $ref<typeof NotionSticker>()
 let text = $ref('你好世界')
 let colors = $ref(['#000000'])
 let multiColor = $ref(false)
 
+const graphemes = $computed(() => Intl.Segmenter ? [...new Intl.Segmenter().segment(text)] : text.split(''))
+const colorMatrixSize = $computed(() => multiColor ? Math.ceil(Math.sqrt(graphemes.length)) : 1)
+const colorMatrixStyle = $computed(() => ({
+  gridTemplateRows: `repeat(${colorMatrixSize}, 40px)`,
+  gridTemplateColumns: `repeat(${colorMatrixSize}, 40px)`,
+}))
+
 watch($$(multiColor), value => {
   if (!value) {
     colors.splice(1, Infinity)
+  } else {
+    colors.push('')
   }
 })
 
@@ -53,7 +64,8 @@ async function copy (format: string) {
 }
 
 async function copyCommand () {
-  await navigator.clipboard.writeText(`@NotionStickerBot ${text} ${colors.join(',').replaceAll('#000000', '')}`)
+  const textInput = text.includes(' ') || text.startsWith('"') ? `"${text.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"` : text
+  await navigator.clipboard.writeText(`@NotionStickerBot ${textInput} ${colors.join(',').replaceAll('#000000', '')}`.trim())
 }
 </script>
 
@@ -64,17 +76,21 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
 
   div(class="py-5 sticky top-0")
-    NotionSticker(ref="sticker" :text="text" :color="colors.join(',')" style="width: 256px; height: 256px;")
+    NotionSticker(ref="sticker" :text="text" :color="multiColor ? colors.join(',') : colors[0]" style="width: 256px; height: 256px;")
 
-  p(class="text-neutral-400") 1. 输入贴纸文字（最多 4 个字符）
-  input(v-model="text" type="text" class="flex-none box-content w-[4em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
+  p(class="text-neutral-400") 1. 输入贴纸文字（最多 {{ MAX }} 个字符）
+  input(v-model="text" type="text" class="flex-none box-content w-[9em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
 
   p(class="text-neutral-400") 2. 设置文字颜色
-  div(class="grid grid-rows-[40px] grid-cols-[repeat(4,40px)] gap-px")
-    ColorInput(v-model="colors[0]" :class="['border border-neutral-600', multiColor ? 'rounded-l' : 'rounded', { 'col-span-full': !multiColor }]")
-    ColorInput(v-show="multiColor" v-model="colors[1]" class="border border-neutral-600")
-    ColorInput(v-show="multiColor" v-model="colors[2]" class="border border-neutral-600")
-    ColorInput(v-show="multiColor" v-model="colors[3]" class="border border-neutral-600 rounded-r")
+  div(class="grid gap-px" :style="colorMatrixStyle")
+    ColorInput(
+      v-for="n of colorMatrixSize ** 2"
+      :key="n"
+      v-model="colors[n - 1]"
+      :disabled="n > graphemes.length || graphemes[n - 1].segment === ' '"
+      :class="['border border-neutral-600', { 'rounded-tl': n === 1, 'rounded-tr': n === colorMatrixSize, 'rounded-bl': n === colorMatrixSize * (colorMatrixSize - 1) + 1, 'rounded-br': n === colorMatrixSize ** 2 }]"
+      disabled-class="border-neutral-800"
+    )
   label(class="mt-2! flex items-center")
     input(v-model="multiColor" type="checkbox" class="mr-2")
     span(class="text-neutral-200") 分别设置颜色

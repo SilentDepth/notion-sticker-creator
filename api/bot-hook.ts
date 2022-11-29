@@ -6,12 +6,24 @@ import telegram from './_utils/telegram'
 
 const DRIVE_CHAT_ID = process.env.TG_CHAT_DRIVE
 
+function parseInput (input: string): { text?: string, color?: string } {
+  const isComplexText = input.startsWith('"')
+  const textEnd = isComplexText ? (input.match(/(?<!^|\\)"/)?.index ?? -1) + 1 : input.indexOf(' ')
+  const text = isComplexText ? input.slice(1, textEnd - 1) : input.slice(0, textEnd < 0 ? undefined : textEnd)
+  return text
+    ? {
+      text: text.replaceAll('\\\\', '\\').replaceAll('\\"', '"'),
+      color: input.slice(textEnd).trim(),
+    }
+    : {}
+}
+
 export default <VercelApiHandler>async function (req, res) {
   const { start, end, result } = profiler()
 
   const queryID = req.body.inline_query?.id
   const input = req.body.inline_query?.query
-  const [text, color] = input.split(/\s+/)
+  const { text, color } = parseInput(input)
 
   if (text) {
     let stickerFileID: string
@@ -30,7 +42,7 @@ export default <VercelApiHandler>async function (req, res) {
       start('send-sticker')
       const message = await telegram.post<never, TgMessage<'sticker'>>('sendSticker', {
         chat_id: DRIVE_CHAT_ID,
-        sticker: `https://${process.env.VERCEL_URL}/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(color)}`,
+        sticker: `https://${process.env.VERCEL_URL}/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(color ?? '')}`,
       })
       stickerFileID = message.sticker.file_id
       end('send-sticker')
