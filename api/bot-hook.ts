@@ -13,7 +13,7 @@ function parseInput (input: string): { text?: string, color?: string } {
   return text
     ? {
       text: text.replaceAll('\\\\', '\\').replaceAll('\\"', '"'),
-      color: input.slice(textEnd).trim(),
+      color: textEnd < 0 ? undefined : input.slice(textEnd).trim(),
     }
     : {}
 }
@@ -24,6 +24,7 @@ export default <VercelApiHandler>async function (req, res) {
   const queryID = req.body.inline_query?.id
   const input = req.body.inline_query?.query
   const { text, color } = parseInput(input)
+  console.log(text, ',', color)
 
   if (text) {
     let stickerFileID: string
@@ -42,7 +43,7 @@ export default <VercelApiHandler>async function (req, res) {
       start('send-sticker')
       const message = await telegram.post<never, TgMessage<'sticker'>>('sendSticker', {
         chat_id: DRIVE_CHAT_ID,
-        sticker: `https://${process.env.VERCEL_URL}/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(color ?? '')}`,
+        sticker: `https://notion-sticker.silent.land/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(color ?? '')}`,
       })
       stickerFileID = message.sticker.file_id
       end('send-sticker')
