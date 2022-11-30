@@ -24,7 +24,6 @@ export default <VercelApiHandler>async function (req, res) {
   const queryID = req.body.inline_query?.id
   const input = req.body.inline_query?.query
   const { text, color } = parseInput(input)
-  console.log(text, ',', color)
 
   if (text) {
     let stickerFileID: string
