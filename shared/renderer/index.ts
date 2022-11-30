@@ -161,8 +161,8 @@ function style (segments: TemplateStringsArray, ...interpolations: any[]): Recor
       .split(/\s*;(?!base64)\s*/)
       .filter(Boolean)
       .map(rule => {
-        const idx = rule.indexOf(':')
-        const [prop, value] = [rule.slice(0, idx).trim(), rule.slice(idx + 1).trim()]
+        const nameEnd = rule.indexOf(':')
+        const [prop, value] = [rule.slice(0, nameEnd).trim(), rule.slice(nameEnd + 1).trim()]
         return [camelCase(prop), value]
       })
   )
