@@ -32,9 +32,8 @@ watch(props, async props => {
   svg = await render(props.text, {
     size: props.size,
     color: props.color,
-    params: props.params,
-    debug: props.debug,
-  })
+    ...props.params,
+  }, props.debug)
 }, { immediate: true })
 </script>
 
