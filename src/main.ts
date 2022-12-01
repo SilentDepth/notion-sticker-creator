@@ -3,5 +3,24 @@ import 'uno.css'
 import { createApp } from 'vue'
 
 import App from './app.vue'
+import Dev from './dev.vue'
+import Design from './design.vue'
 
-createApp(App).mount('#app')
+let root
+
+if (import.meta.env.DEV) {
+  switch (location.pathname) {
+    case '/dev':
+      root = Dev
+      break
+    case '/design':
+      root = Design
+      break
+    default:
+      root = App
+  }
+} else {
+  root = App
+}
+
+createApp(root).mount('#app')
