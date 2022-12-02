@@ -9,14 +9,14 @@ const Template: Record<Template, Function> = {
   calendar: Calendar,
 }
 
-interface Props {
-  input: string
+interface Props<T> {
+  input: T
   frame: string
   template?: Template
   params?: Record<string, unknown>
 }
 
-export default function ({ input, frame, template = 'phrase', params }: Props, debug?: boolean) {
+export default function<T> ({ input, frame, template = 'phrase', params }: Props<T>, debug?: boolean) {
   return h(
     'div',
     { style: 'display: flex; width: 100%; height: 100%' },

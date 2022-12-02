@@ -11,6 +11,10 @@ http.interceptors.response.use(
   err => Promise.reject(err.response.data),
 )
 
+/**
+ * @param buffer - Sticker buffer
+ * @returns Sticker file ID returned by Telegram
+ */
 export async function sendSticker (buffer: Buffer): Promise<string> {
   const form = new FormData()
   form.append('chat_id', DRIVE_CHAT_ID)

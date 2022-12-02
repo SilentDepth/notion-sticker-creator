@@ -14,15 +14,15 @@ export interface Options extends Record<string, unknown> {
   template?: Template
 }
 
-export default async function render (input: string, debug?: boolean): Promise<string>
+export default async function render<T = unknown> (input: T, debug?: boolean): Promise<string>
 /**
  * @param  input        - Content to render
  * @param [optionsInit] - Currently only color is supported
  * @param [debug]       - Debug mode
  * @returns The sticker in SVG string
  */
-export default async function render (input: string, optionsInit?: Partial<Options>, debug?: boolean): Promise<string>
-export default async function render (input: string, arg1?: boolean | Partial<Options>, arg2?: boolean): Promise<string> {
+export default async function render<T = unknown> (input: T, optionsInit?: Partial<Options>, debug?: boolean): Promise<string>
+export default async function render<T = unknown> (input: T, arg1?: boolean | Partial<Options>, arg2?: boolean): Promise<string> {
   const optionsInit: undefined | Partial<Options> = typeof arg1 === 'boolean' ? undefined : arg1
   const debug = typeof arg1 === 'boolean' ? arg1 : arg2
 

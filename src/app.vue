@@ -64,8 +64,13 @@ async function copy (format: string) {
 }
 
 async function copyCommand () {
-  const textInput = text.includes(' ') || text.startsWith('"') ? `"${text.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"` : text
-  await navigator.clipboard.writeText(`@NotionStickerBot ${textInput} ${colors.join(',').replaceAll('#000000', '')}`.trim())
+  const command = [
+    // TODO: Extract bot username as env
+    '@NotionStickerBot',
+    text.replaceAll(/[ =\\]/g, '\\$1'),
+    'color=' + colors.map(c => c === '#000000' ? '' : c).join(',').replace(/^,+$/, ''),
+  ].filter(Boolean).join(' ')
+  await navigator.clipboard.writeText(command)
 }
 </script>
 
@@ -109,7 +114,7 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     button(type="button" class="col-span-2 px-[1em] py-[0.25em] bg-blue-600 text-white rounded hover:bg-blue-500 mr-px" @click="download('webp')") 下载
     //- button(type="button" class="px-[1em] py-[0.25em] bg-blue-600 text-white rounded-r hover:bg-blue-500" @click="copy('webp')") 复制
     span(class="mr-4 text-neutral-200") Bot 命令
-    AsyncButton(type="button" class="col-span-2 px-[1em] py-[0.25em] bg-blue-600 text-white rounded hover:bg-blue-500" @click="copyCommand")
+    AsyncButton(type="button" :disabled="!text" class="col-span-2 px-[1em] py-[0.25em] bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600! text-white disabled:text-opacity-50 rounded" @click="copyCommand")
       template(#default="{ done }")
         span(:class="['transition duration-200', { 'opacity-0': done }]") 复制
       template(#async)

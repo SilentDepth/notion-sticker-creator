@@ -1,11 +1,11 @@
 import sharp, { type FormatEnum } from 'sharp'
 import render, { type Options } from '../../shared/renderer'
 
-export default function createSticker (input: string, options?: Partial<Options>): RenderResult {
+export default function createSticker (input: unknown, options?: Partial<Options>): RenderResult {
   return _render(input, options)
 }
 
-function _render (input: string, options?: Partial<Options>): RenderResult {
+function _render (input: unknown, options?: Partial<Options>): RenderResult {
   const result: Partial<RenderResult> = render(input, options)
 
   result.toBuffer = async function toBuffer (this: RenderResult, format) {

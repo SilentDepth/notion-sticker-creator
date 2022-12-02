@@ -1,89 +1,134 @@
 import type { VercelApiHandler } from '@vercel/node'
-import sharp from 'sharp'
 
 import profiler from '../shared/profiler'
-import render from '../shared/renderer'
 import * as deta from './_utils/deta'
 import * as telegram from './_utils/telegram'
 import createSticker from './_utils/sticker'
 
-function parseInput (input: string): { text?: string, color?: string } {
-  const isComplexText = input.startsWith('"')
-  const textEnd = isComplexText ? (input.match(/(?<!^|\\)"/)?.index ?? -1) + 1 : input.indexOf(' ')
-  const text = isComplexText ? input.slice(1, textEnd - 1) : input.slice(0, textEnd < 0 ? undefined : textEnd)
-  return text
-    ? {
-      text: text.replaceAll('\\\\', '\\').replaceAll('\\"', '"'),
-      color: textEnd < 0 ? undefined : input.slice(textEnd).trim(),
-    }
-    : {}
-}
-
 export default <VercelApiHandler>async function (req, res) {
   const { start, end, result } = profiler()
 
-  const queryID = req.body.inline_query?.id
+  const queryId = req.body.inline_query?.id
   const input = req.body.inline_query?.query
 
-  if (input.startsWith(':')) {
-    switch (input.slice(1)) {
-      case 'calendar': {
-        const sticker = await createSticker('', { template: 'calendar' }).toBuffer('webp')
-        const fileId = await telegram.sendSticker(sticker)
-        await telegram.answerInlineQuery(queryID, queryID, fileId)
-        return
-      }
-      default:
-        res.status(204)
-        return res.end()
-    }
+  const { mode, ...params } = parseArg(input) ?? {}
+  const task = switchTask(mode)?.(params)
+  if (!task) {
+    return send204()
   }
 
-  const { text, color } = parseInput(input)
-
-  if (text) {
-    let stickerFileID: string
-
-    // Check if an identical sticker has been generated before
-    start('check-cache')
-    const cached = await deta.getItem(`${text} ${color}`)
-    end('check-cache')
-
-    if (cached) {
-      stickerFileID = cached.sticker_file_id
-    } else {
-      start('render-sticker')
-      const svg = await render(text, { color: color ?? '' })
-      end('render-sticker')
-      start('sharp')
-      const buffer = await sharp(Buffer.from(svg, 'ascii')).toFormat('webp').toBuffer()
-      end('sharp')
-      // First, create a webp and upload to Telegram server (by sending file to a "hidden" group)
-      start('send-sticker')
-      stickerFileID = await telegram.sendSticker(buffer)
-      end('send-sticker')
+  try {
+    const key = (await task.next()).value as string
+    if (!key) {
+      return send204()
     }
 
-    await Promise.all([
-      // Then, "forward" the uploaded webp to user as inline query result
-      // This is the only way we found which is possible to send a sticker via an inline bot
-      (async () => {
-        start('answer-inline-query')
-        await telegram.answerInlineQuery(queryID, text, stickerFileID)
-        end('answer-inline-query')
-      })(),
-      // If no cache found, insert one into cache database
-      (async () => {
-        if (cached) return
-        start('insert-cache')
-        await deta.insertItem({ key: `${text} ${color}`, sticker_file_id: stickerFileID })
-        end('insert-cache')
-      })(),
-    ])
+    start('deta:check-cache')
+    const cache = await deta.getItem(key)
+    end('deta:check-cache')
 
-    console.log({ profile: 'hook', query: req.body.inline_query?.query, ...result() })
+    if (cache) {
+      start('telegram:answer-inline-query')
+      await telegram.answerInlineQuery(queryId, '0', cache.sticker_file_id)
+      end('telegram:answer-inline-query')
+    } else {
+      start('render-sticker')
+      const buffer = (await task.next()).value as Buffer
+      end('render-sticker')
+
+      start('telegram:send-sticker')
+      const fileId = await telegram.sendSticker(buffer)
+      end('telegram:send-sticker')
+
+      await Promise.all([
+        (async () => {
+          start('telegram:answer-inline-query')
+          await telegram.answerInlineQuery(queryId, '0', fileId)
+          end('telegram:answer-inline-query')
+        })(),
+        (async () => {
+          start('deta:insert-item')
+          await deta.insertItem({ key, sticker_file_id: fileId })
+          end('deta:insert-item')
+        })(),
+      ])
+    }
+  } catch (err) {
+    console.error(err)
+  } finally {
+    console.log({ profile: 'hook', query: input, ...result() })
   }
 
   // We don't need to send anything back to Telegram
-  res.status(204).end()
+  return send204()
+
+  function send204 (): void {
+    res.status(204).end()
+  }
+}
+
+type Args = Record<string, string> & { mode: string, input?: string[] }
+
+function parseArg (input: string): Args | null {
+  const MODE_RE = /^\$(\w+)(?:\s+|$)/y
+  const [, mode = 'phrase'] = MODE_RE.exec(input) ?? []
+  if (!input || !['phrase', 'calendar'].includes(mode)) {
+    return null
+  }
+
+  const segments = input
+    .slice(MODE_RE.lastIndex)
+    .split(/((?<!\\)\s)+/)
+    .filter(s => !/^\s*$/.test(s))
+  const args = segments.reduce((dict, arg) => {
+    const [key, value] = arg.split(/(?<=^\w+)=/)
+    if (value) {
+      dict[key] = value.replaceAll(/\\(.)/g, '$1')
+    } else {
+      dict.input ??= []
+      dict.input.push(key.replaceAll(/\\(.)/g, '$1'))
+    }
+    return dict
+  }, {} as Record<string, string> & { input?: string[] })
+
+  return Object.assign(args, { mode })
+}
+
+function switchTask (mode?: string) {
+  switch (mode) {
+    case 'phrase':
+      return createPhrase
+    case 'calendar':
+      return createCalendar
+    default:
+      return null
+  }
+}
+
+async function* createPhrase ({ input, color }: Omit<Args, 'mode'>): AsyncGenerator {
+  const text = input?.[0]
+
+  // Cache key
+  yield text ? ['phrase', encode(text), color].filter(Boolean).join(':') : null
+  // Sticker buffer
+  yield await createSticker(text, { color }).toBuffer('webp')
+}
+
+async function* createCalendar ({ input, color, timezone }: Omit<Args, 'mode'>): AsyncGenerator {
+  process.env.TZ = 'Asia/Shanghai'
+  const date = input?.[0] ? new Date(input[0]) : new Date()
+  if (Number.isNaN(date.getTime())) {
+    throw new Error('Invalid date')
+  }
+  color = color || 'crimson'
+
+  const dateStr = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
+  // Cache key
+  yield ['calendar', encode(dateStr), color].filter(Boolean).join(':')
+  // Sticker buffer
+  yield await createSticker(date, { template: 'calendar', color }).toBuffer('webp')
+}
+
+function encode (str: string): string {
+  return Buffer.from(str).toString('base64url')
 }
