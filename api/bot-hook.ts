@@ -1,10 +1,11 @@
 import type { VercelApiHandler } from '@vercel/node'
+import sharp from 'sharp'
 
 import profiler from '../shared/profiler'
-import deta from './_utils/deta'
-import telegram from './_utils/telegram'
-
-const DRIVE_CHAT_ID = process.env.TG_CHAT_DRIVE
+import render from '../shared/renderer'
+import * as deta from './_utils/deta'
+import * as telegram from './_utils/telegram'
+import createSticker from './_utils/sticker'
 
 function parseInput (input: string): { text?: string, color?: string } {
   const isComplexText = input.startsWith('"')
@@ -23,6 +24,21 @@ export default <VercelApiHandler>async function (req, res) {
 
   const queryID = req.body.inline_query?.id
   const input = req.body.inline_query?.query
+
+  if (input.startsWith(':')) {
+    switch (input.slice(1)) {
+      case 'calendar': {
+        const sticker = await createSticker('', { template: 'calendar' }).toBuffer('webp')
+        const fileId = await telegram.sendSticker(sticker)
+        await telegram.answerInlineQuery(queryID, queryID, fileId)
+        return
+      }
+      default:
+        res.status(204)
+        return res.end()
+    }
+  }
+
   const { text, color } = parseInput(input)
 
   if (text) {
@@ -30,21 +46,21 @@ export default <VercelApiHandler>async function (req, res) {
 
     // Check if an identical sticker has been generated before
     start('check-cache')
-    const cached = await deta.get<never, CacheItem | null>(`stickers/items/${encodeURIComponent(`${text} ${color}`)}`)
-      // 404 is considered a normal response which means no cache found
-      .catch(err => err.response.status === 404 ? null : Promise.reject(err))
+    const cached = await deta.getItem(`${text} ${color}`)
     end('check-cache')
 
     if (cached) {
       stickerFileID = cached.sticker_file_id
     } else {
+      start('render-sticker')
+      const svg = await render(text, { color: color ?? '' })
+      end('render-sticker')
+      start('sharp')
+      const buffer = await sharp(Buffer.from(svg, 'ascii')).toFormat('webp').toBuffer()
+      end('sharp')
       // First, create a webp and upload to Telegram server (by sending file to a "hidden" group)
       start('send-sticker')
-      const message = await telegram.post<never, TgMessage<'sticker'>>('sendSticker', {
-        chat_id: DRIVE_CHAT_ID,
-        sticker: `https://notion-sticker.silent.land/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(color ?? '')}`,
-      })
-      stickerFileID = message.sticker.file_id
+      stickerFileID = await telegram.sendSticker(buffer)
       end('send-sticker')
     }
 
@@ -53,23 +69,14 @@ export default <VercelApiHandler>async function (req, res) {
       // This is the only way we found which is possible to send a sticker via an inline bot
       (async () => {
         start('answer-inline-query')
-        await telegram.post('answerInlineQuery', {
-          inline_query_id: queryID,
-          results: [{
-            type: 'sticker',
-            id: text,
-            sticker_file_id: stickerFileID,
-          }],
-        })
+        await telegram.answerInlineQuery(queryID, text, stickerFileID)
         end('answer-inline-query')
       })(),
       // If no cache found, insert one into cache database
       (async () => {
         if (cached) return
         start('insert-cache')
-        await deta.post(`stickers/items`, {
-          item: { key: `${text} ${color}`, sticker_file_id: stickerFileID },
-        })
+        await deta.insertItem({ key: `${text} ${color}`, sticker_file_id: stickerFileID })
         end('insert-cache')
       })(),
     ])
@@ -79,23 +86,4 @@ export default <VercelApiHandler>async function (req, res) {
 
   // We don't need to send anything back to Telegram
   res.status(204).end()
-}
-
-interface CacheItem {
-  key: string
-  sticker_file_id: string
-}
-
-type TgMessage<T> = {
-  message_id: number
-  // We don't need other properties
-  // ...
-} & (
-  T extends 'sticker' ? { sticker: TgSticker } : {}
-)
-
-interface TgSticker {
-  file_id: string
-  // We don't need other properties
-  // ...
 }

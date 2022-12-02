@@ -13,7 +13,8 @@ const params = reactive({
 <template lang="pug">
 div(class="min-h-screen bg-gray-700 text-gray-200 flex flex-col justify-center items-center gap-4")
   NotionSticker(
-    :text="text"
+    :input="text"
+    template="calendar"
     :params="params"
     :debug="debug"
   )

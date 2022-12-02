@@ -9,7 +9,7 @@ interface Props {
   color?: string
   /** Text region padding in em. Default to 0.25em */
   padding?: number
-  /** Text baseline offset in em. Default to 17/238em*/
+  /** Text baseline offset in em. Default to 17/238em */
   offset?: number
   style?: string
 }

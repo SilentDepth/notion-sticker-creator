@@ -1,13 +1,22 @@
 import { h } from './utils'
 import Phrase from './templates/phrase'
+import Calendar from './templates/calendar'
+
+export type Template = 'phrase' | 'calendar'
+
+const Template: Record<Template, Function> = {
+  phrase: Phrase,
+  calendar: Calendar,
+}
 
 interface Props {
   input: string
   frame: string
+  template?: Template
   params?: Record<string, unknown>
 }
 
-export default function ({ input, frame, params }: Props, debug?: boolean) {
+export default function ({ input, frame, template = 'phrase', params }: Props, debug?: boolean) {
   return h(
     'div',
     { style: 'display: flex; width: 100%; height: 100%' },
@@ -18,7 +27,7 @@ export default function ({ input, frame, params }: Props, debug?: boolean) {
         height: '100%',
         style: 'position: absolute; top: 0; left: 0',
       }),
-      Phrase(
+      Template[template](
         {
           input,
           ...params,

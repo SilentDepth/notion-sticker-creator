@@ -15,6 +15,7 @@ importers:
       '@vercel/node': ^2.6.4
       '@vitejs/plugin-vue': ^3.2.0
       axios: ^1.2.0
+      form-data: ^4.0.0
       pug: ^3.0.2
       satori: ^0.0.44
       sharp: ^0.31.2
@@ -26,6 +27,7 @@ importers:
     dependencies:
       '@unocss/reset': 0.46.5
       axios: 1.2.0
+      form-data: 4.0.0
       satori: 0.0.44
       sharp: 0.31.2
       vue: 3.2.45

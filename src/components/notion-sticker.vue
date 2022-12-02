@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { watch } from 'vue'
+import { type PropType, watch } from 'vue'
 
 import render from '../../shared/renderer'
+import { type Template } from '../../shared/renderer/sticker'
 
 const props = defineProps({
-  text: {
+  input: {
     type: String,
     default: '',
   },
@@ -12,9 +13,9 @@ const props = defineProps({
     type: Number,
     default: 512,
   },
-  color: {
-    type: String,
-    default: '#000',
+  template: {
+    type: String as PropType<Template>,
+    default: undefined,
   },
   params: {
     type: Object,
@@ -29,9 +30,9 @@ const props = defineProps({
 let svg = $ref('')
 
 watch(props, async props => {
-  svg = await render(props.text, {
+  svg = await render(props.input, {
     size: props.size,
-    color: props.color,
+    template: props.template,
     ...props.params,
   }, props.debug)
 }, { immediate: true })
