@@ -14,7 +14,6 @@ const params = reactive({
 div(class="min-h-screen bg-gray-700 text-gray-200 flex flex-col justify-center items-center gap-4")
   NotionSticker(
     :input="text"
-    template="calendar"
     :params="params"
     :debug="debug"
   )

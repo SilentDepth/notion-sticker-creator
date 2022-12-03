@@ -15,6 +15,7 @@ importers:
       '@vercel/node': ^2.6.4
       '@vitejs/plugin-vue': ^3.2.0
       axios: ^1.2.0
+      dotenv: ^16.0.3
       form-data: ^4.0.0
       pug: ^3.0.2
       satori: ^0.0.44
@@ -36,6 +37,7 @@ importers:
       '@types/sharp': 0.31.0
       '@vercel/node': 2.6.4
       '@vitejs/plugin-vue': 3.2.0_vite@3.2.4+vue@3.2.45
+      dotenv: 16.0.3
       pug: 3.0.2
       typescript: 4.9.3
       unocss: 0.46.5_vite@3.2.4
@@ -986,6 +988,11 @@ packages:
 
   /doctypes/1.1.0:
     resolution: {integrity: sha512-LLBi6pEqS6Do3EKQ3J0NqHWV5hhb78Pi8vvESYwyOy2c31ZEZVdtitdzsQsKb7878PEERhzUk0ftqGhG6Mz+pQ==}
+    dev: true
+
+  /dotenv/16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
     dev: true
 
   /duplexer/0.1.2:
