@@ -114,8 +114,8 @@ async function* createPhrase ({ input, color }: Omit<Args, 'mode'>): AsyncGenera
   yield await createSticker(text, { color }).toBuffer('webp')
 }
 
-async function* createCalendar ({ input, color, timezone }: Omit<Args, 'mode'>): AsyncGenerator {
-  process.env.TZ = 'Asia/Shanghai'
+async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai' }: Omit<Args, 'mode'>): AsyncGenerator {
+  process.env.TZ = timezone
   const date = input?.[0] ? new Date(input[0]) : new Date()
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
