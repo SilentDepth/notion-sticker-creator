@@ -90,6 +90,11 @@ function parseArg (input: string): Args | null {
     }
     return dict
   }, {} as Record<string, string> & { input?: string[] })
+  // Telegram will trim every message before send to bot server. Therefore, we may
+  // receive user's "A\ " as "A\" where the space is trimmed.
+  // However, it should not be valid that user intended to drop a single "\" at the
+  // end, since it should be escaped beforehand anyway. So we could assume that the
+  // last "\" is actually an escape for a space.
   if (args.input?.[0].endsWith('\\')) {
     args.input[0] = args.input[0].slice(0, -1) + ' '
   }
