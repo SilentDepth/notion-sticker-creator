@@ -1,15 +1,26 @@
 import { h } from '../utils'
 
+function weekday (value: number, locale: string): string {
+  switch (true) {
+    case locale.startsWith('en'):
+      return ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][value]
+    case locale.startsWith('zh'):
+    default:
+      return `星期${'日一二三四五六'[value]}`
+  }
+}
+
 interface Props {
   input?: string | Date
   color?: string
+  locale?: string
   /** Text baseline offset in em. Default to 17/238em */
   // TODO: DRY-it
   offset?: number
   style?: string
 }
 
-export default function ({ input = new Date(), color = '#000', offset = 17 / 238, style = '' }: Props, debug?: boolean) {
+export default function ({ input = new Date(), color = '#000', locale = 'zh', offset = 17 / 238, style = '' }: Props, debug?: boolean) {
   const date = typeof input === 'string' && input ? new Date(input) : new Date()
 
   return h(
@@ -29,7 +40,7 @@ export default function ({ input = new Date(), color = '#000', offset = 17 / 238
       h(
         'span',
         { style: `font-size: 50px; height: 1em; transform: translateY(-${50 * offset}px)` },
-        `星期${'日一二三四五六'[date.getDay()]}`,
+        weekday(date.getDay(), locale),
       ),
     ],
   )

@@ -1,38 +1,31 @@
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { type Component, watch } from 'vue'
 
-import NotionSticker from './components/notion-sticker.vue'
+const components = import.meta.glob<{ default: Component }>('./dev-components/*.vue')
 
-let text = $ref('风乍暖日初长袅垂杨')
-let debug = $ref(false)
-const params = reactive({
-  padding: 0.25,
+let current = $ref<string>('phrase')
+let currentComp = $shallowRef<Component>()
+
+watch($$(current), async value => {
+  currentComp = (await components[value]?.())?.default
 })
 </script>
 
 <template lang="pug">
-div(class="min-h-screen bg-gray-700 text-gray-200 flex flex-col justify-center items-center gap-4")
-  NotionSticker(
-    :input="text"
-    :params="params"
-    :debug="debug"
-  )
-  div(class="flex items-start gap-2")
-    label(class="flex flex-col gap-2")
-      code(class="text-sm") &ZeroWidthSpace;
-      span(class="flex items-center space-x-1")
-        input(v-model="debug" type="checkbox")
-        span Debug
-    label(class="flex flex-col gap-2")
-      code(class="text-sm") text
-      input(v-model="text" type="text" style="width: 200px")
-    label(class="flex flex-col gap-2")
-      code(class="text-sm") padding
-      input(:value="params.padding * 100" type="number" style="width: 100px" @input="params.fontSize = $event.target.value / 100")
+div(class="min-h-screen bg-gray-700 text-gray-200 flex flex-col")
+  nav(class="flex-none flex justify-center")
+    a(
+      v-for="(_, comp) of components"
+      href="javascript:"
+      :class="['px-2 py-2', { 'text-white font-bold': current === comp }]"
+      @click="current = comp"
+    ) {{ comp.replace(/^\.\/dev-components\//, '') }}
+  div(class="flex-1 flex flex-col justify-center items-center gap-4")
+    component(:is="currentComp")
 </template>
 
 <style scoped>
-input {
+div::v-deep(input) {
   padding: 0 4px;
   color: black;
 }

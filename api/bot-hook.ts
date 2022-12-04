@@ -114,7 +114,7 @@ async function* createPhrase ({ input, color }: Omit<Args, 'mode'>): AsyncGenera
   yield await createSticker(text, { color }).toBuffer('webp')
 }
 
-async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai' }: Omit<Args, 'mode'>): AsyncGenerator {
+async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai', locale }: Omit<Args, 'mode'>): AsyncGenerator {
   process.env.TZ = timezone
   const date = input?.[0] ? new Date(input[0]) : new Date()
   if (Number.isNaN(date.getTime())) {
@@ -124,9 +124,9 @@ async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai' }: Om
 
   const dateStr = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
   // Cache key
-  yield ['calendar', encode(dateStr), color].filter(Boolean).join(':')
+  yield ['calendar', encode(dateStr), color, locale].filter(Boolean).join(':')
   // Sticker buffer
-  yield await createSticker(date, { template: 'calendar', color }).toBuffer('webp')
+  yield await createSticker(date, { template: 'calendar', color, locale }).toBuffer('webp')
 }
 
 function encode (str: string): string {

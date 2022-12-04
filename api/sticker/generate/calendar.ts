@@ -4,9 +4,9 @@ import type { FormatEnum } from 'sharp'
 import createSticker from '../../_utils/sticker'
 
 export default <VercelApiHandler>async function (req, res) {
-  const { date, format, color } = resolveQuery(req.query)
+  const { date, format, ...params } = resolveQuery(req.query)
 
-  const sticker = createSticker(date, { template: 'calendar', color })
+  const sticker = createSticker(date, { template: 'calendar', ...params })
 
   res.setHeader('Content-Type', resolveMIME(format))
   res.send(format === 'svg' ? await sticker : await sticker.toBuffer(format))
@@ -15,6 +15,7 @@ export default <VercelApiHandler>async function (req, res) {
 interface RequestQuery {
   date: string | Date
   timezone: string
+  locale: string
   format: keyof FormatEnum
   color: string
 }
@@ -24,6 +25,7 @@ function resolveQuery (query: Partial<RequestQuery> = {}): RequestQuery {
   return {
     date: query.date || new Date(),
     timezone: query.timezone || process.env.TZ,
+    locale: query.locale || 'zh',
     format: query.format || 'webp',
     color: query.color || 'crimson',
   }
