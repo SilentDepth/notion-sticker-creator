@@ -67,7 +67,7 @@ async function copyCommand () {
   const command = [
     // TODO: Extract bot username as env
     '@NotionStickerBot',
-    text.replaceAll(/[ =\\]/g, '\\$1'),
+    text.replaceAll(/([ =\\])/g, '\\$1'),
     'color=' + colors.map(c => c === '#000000' ? '' : c).join(',').replace(/^,+$/, ''),
   ].filter(Boolean).join(' ')
   await navigator.clipboard.writeText(command)
