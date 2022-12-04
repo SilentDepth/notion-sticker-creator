@@ -90,6 +90,9 @@ function parseArg (input: string): Args | null {
     }
     return dict
   }, {} as Record<string, string> & { input?: string[] })
+  if (args.input?.[0].endsWith('\\')) {
+    args.input[0] = args.input[0].slice(0, -1) + ' '
+  }
 
   return Object.assign(args, { mode })
 }
