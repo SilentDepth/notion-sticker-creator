@@ -21,7 +21,7 @@ interface Props {
 }
 
 export default function ({ input = new Date(), color = '#000', locale = 'zh', offset = 17 / 238, style = '' }: Props, debug?: boolean) {
-  const date = typeof input === 'string' && input ? new Date(input) : new Date()
+  const date = input ? new Date(input) : new Date()
 
   return h(
     'div',

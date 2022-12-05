@@ -24,7 +24,7 @@ interface RequestQuery {
 function resolveQuery (query: Partial<RequestQuery> = {}): RequestQuery {
   process.env.TZ = query.timezone || 'Asia/Shanghai'
 
-  const date = query.date && typeof query.date === 'string' ? new Date(query.date) : new Date()
+  const date = query.date ? new Date(query.date) : new Date()
 
   const color = query.color === 'week' ? weekdayColors[date.getDay()] : query.color
 
