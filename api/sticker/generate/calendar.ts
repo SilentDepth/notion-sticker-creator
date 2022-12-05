@@ -1,6 +1,7 @@
 import type { VercelApiHandler } from '@vercel/node'
 import type { FormatEnum } from 'sharp'
 
+import weekdayColors from '../../../shared/renderer/weekday-colors'
 import createSticker from '../../_utils/sticker'
 
 export default <VercelApiHandler>async function (req, res) {
@@ -22,12 +23,17 @@ interface RequestQuery {
 
 function resolveQuery (query: Partial<RequestQuery> = {}): RequestQuery {
   process.env.TZ = query.timezone || 'Asia/Shanghai'
+
+  const date = query.date && typeof query.date === 'string' ? new Date(query.date) : new Date()
+
+  const color = query.color === 'week' ? weekdayColors[date.getDay()] : query.color
+
   return {
-    date: query.date || new Date(),
+    date,
     timezone: query.timezone || process.env.TZ,
     locale: query.locale || 'zh',
     format: query.format || 'webp',
-    color: query.color || 'crimson',
+    color: color || 'crimson',
   }
 }
 
