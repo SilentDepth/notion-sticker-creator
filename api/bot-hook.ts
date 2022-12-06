@@ -4,6 +4,7 @@ import profiler from '../shared/profiler'
 import * as deta from './_utils/deta'
 import * as telegram from './_utils/telegram'
 import createSticker from './_utils/sticker'
+import weekdayColors from '../shared/renderer/weekday-colors'
 
 export default <VercelApiHandler>async function (req, res) {
   const { start, end, result } = profiler()
@@ -124,11 +125,13 @@ async function* createPhrase ({ input, color }: Omit<Args, 'mode'>): AsyncGenera
 
 async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai', locale }: Omit<Args, 'mode'>): AsyncGenerator {
   process.env.TZ = timezone
+
   const date = input?.[0] ? new Date(input[0]) : new Date()
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
   }
-  color = color || 'crimson'
+
+  color = color === 'week' ? weekdayColors[date.getDay()] : (color || 'crimson')
 
   const dateStr = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
   // Cache key
