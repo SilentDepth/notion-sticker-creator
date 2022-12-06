@@ -11,7 +11,7 @@ const params = reactive({
 </script>
 
 <template lang="pug">
-NotionSticker(:input="text" :params="params" :debug="debug")
+NotionSticker(:input="text" :padding="params.padding" :debug="debug")
 div(class="flex items-start gap-2")
   label(class="flex flex-col gap-2")
     code(class="text-sm") &ZeroWidthSpace;

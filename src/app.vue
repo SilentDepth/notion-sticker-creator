@@ -81,7 +81,7 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
 
   div(class="py-5 sticky top-0")
-    NotionSticker(ref="sticker" :params="{ input: text, color: multiColor ? colors.join(',') : colors[0] }" style="width: 256px; height: 256px;")
+    NotionSticker(ref="sticker" :input="text" :color="multiColor ? colors.join(',') : colors[0]" style="width: 256px; height: 256px;")
 
   p(class="text-neutral-400") 1. 输入贴纸文字（最多 {{ MAX }} 个字符）
   input(v-model="text" type="text" class="flex-none box-content w-[9em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")

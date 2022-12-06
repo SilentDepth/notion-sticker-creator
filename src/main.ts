@@ -9,11 +9,11 @@ import Design from './design.vue'
 let root
 
 if (import.meta.env.DEV) {
-  switch (location.pathname) {
-    case '/dev':
+  switch (true) {
+    case location.pathname.startsWith('/dev'):
       root = Dev
       break
-    case '/design':
+    case location.pathname.startsWith('/design'):
       root = Design
       break
     default:

@@ -2,7 +2,7 @@
   "name": "@notion-sticker-creator/web",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host --port 3000",
     "build": "vite build",
     "serve": "vite preview"
   },

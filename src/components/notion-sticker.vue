@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { type PropType, watch } from 'vue'
+import { type PropType, useAttrs, watch } from 'vue'
 
-import render from '../../shared/renderer'
-import { type Template } from '../../shared/renderer/sticker'
+import render, { type Template } from '../../shared/renderer'
 
 const props = defineProps({
   input: {
-    type: String,
+    type: null,
     default: '',
   },
   size: {
@@ -17,25 +16,23 @@ const props = defineProps({
     type: String as PropType<Template>,
     default: undefined,
   },
-  params: {
-    type: Object,
-    default: undefined,
-  },
   debug: {
     type: Boolean,
     default: false,
   },
 })
 
+const attrs = useAttrs()
+
 let svg = $ref('')
 
-watch(props, async props => {
+watch(() => [props, attrs], async () => {
   svg = await render(props.input, {
     size: props.size,
     template: props.template,
-    ...props.params,
+    ...attrs,
   }, props.debug)
-}, { immediate: true })
+}, { immediate: true, deep: true })
 </script>
 
 <template lang="pug">

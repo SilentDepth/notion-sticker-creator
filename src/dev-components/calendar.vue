@@ -11,7 +11,7 @@ const params = reactive({
 </script>
 
 <template lang="pug">
-NotionSticker(template="calendar" :input="date" :params="params" :debug="debug")
+NotionSticker(template="calendar" :input="date" :color="params.color" :locale="params.locale" :debug="debug")
 div(class="flex items-start gap-2")
   label(class="flex flex-col gap-2")
     code(class="text-sm") &ZeroWidthSpace;
