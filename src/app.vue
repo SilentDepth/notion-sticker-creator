@@ -29,13 +29,18 @@ watch($$(multiColor), value => {
 
 function generateCanvas ($svg: SVGSVGElement) {
   const $image = $svg.querySelector('image')!
+  // Safari seems not support drawImage with a SVGImageElement. So we need recreating
+  // a compatible HTMLImageElement to do the work.
+  const $img = new Image()
+  $img.src = $image.getAttribute('href')!
+
   const $paths = $svg.querySelectorAll('path')
 
   const canvas = document.createElement('canvas')
   canvas.width = Number($svg.getAttribute('width'))
   canvas.height = Number($svg.getAttribute('height'))
   const ctx = canvas.getContext('2d')!
-  ctx.drawImage($image, 0, 0)
+  ctx.drawImage($img, 0, 0)
   for (const $path of $paths) {
     ctx.save()
     type Matrix = [number, number, number, number, number, number]
