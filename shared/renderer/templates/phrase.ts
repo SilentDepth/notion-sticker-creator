@@ -6,6 +6,19 @@ const BLANK = { value: '' }
 
 interface Props {
   input?: string
+  /**
+   * Hints for grapheme positioning
+   *
+   * @example
+   * "159" => A . .
+   *          . B .
+   *          . . C
+   * @example
+   * "951" => C . .
+   *          . B .
+   *          . . A
+   */
+  layout?: string
   color?: string
   /** Text region padding in em. Default to 0.25em */
   padding?: number
@@ -14,58 +27,45 @@ interface Props {
   style?: string
 }
 
-export default function ({ input = '', color = '', padding = 0.25, offset = 17 / 238, style = '' }: Props, debug?: boolean) {
-  const graphemes = split(input)
+export default function ({ input = '', layout, color = '', padding = 0.25, offset = 17 / 238, style = '' }: Props, debug?: boolean) {
+  const graphemes = split(input).slice(0, MAX)
   const colors = color.includes(',') ? color.split(',') : new Array(graphemes.length).fill(color)
 
-  type Char = { value: string, color?: string }
-  let chars: Char[] = graphemes.map((value, idx) => ({ value, color: colors[idx] }))
-  switch (chars.length) {
-    case 0:
-      chars = [BLANK]
-      break
-    case 1:
-      break
-    case 2:
-      chars.splice(1, 0, BLANK, BLANK)
-      break
-    case 3:
-      chars.push(BLANK)
-      break
-    case 4:
-      break
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-      chars.push(...new Array(MAX - chars.length).fill(BLANK))
-      break
-    case 9:
-      break
-    default:
-      chars = chars.slice(0, MAX)
+  if (!layout) {
+    switch (graphemes.length) {
+      case 2:
+        layout = '14'
+        break
+    }
   }
 
-  const groupSize = Math.ceil(Math.sqrt(chars.length))
-  const groups = chars.reduce<any[][]>((groups, grapheme, idx) => {
-    if (idx % groupSize === 0) {
+  const rowSize = Math.ceil(Math.sqrt(graphemes.length))
+  type Char = { value: string, color?: string }
+  const cells = layout
+    ? layout.split('').map(Number).reduce((cells, order, idx) => {
+      cells[order - 1] = { value: graphemes[idx], color: colors[idx] || DEFAULT_COLOR }
+      return cells
+    }, new Array<Char>(rowSize ** 2).fill(BLANK))
+    : Array.from<never, Char>({ length: rowSize ** 2 }, (_, idx) => ({ value: graphemes[idx] || '', color: colors[idx] || DEFAULT_COLOR }))
+  const rows = cells.reduce((groups, grapheme, idx) => {
+    if (idx % rowSize === 0) {
       groups.unshift([])
     }
     groups[0].push(grapheme)
     return groups
-  }, []).reverse()
+  }, [] as Char[][]).reverse()
 
-  const fontSize = 316 / (groupSize + padding * 2)
+  const fontSize = 316 / (rowSize + padding * 2)
 
   return h(
     'div',
     { style: `${style}; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: ${fontSize}px` },
-    groups.map(group => h(
+    rows.map(group => h(
       'div',
       { style: 'display: flex' },
       group.map(grapheme => h(
         'span',
-        { style: `display: flex; justify-content: center; width: 1em; height: 1em; color: ${grapheme.color || DEFAULT_COLOR}; ${debug ? 'box-shadow: 0 0 0 1px #f0f' : ''}` },
+        { style: `display: flex; justify-content: center; width: 1em; height: 1em; color: ${grapheme.color}; ${debug ? 'box-shadow: 0 0 0 1px #f0f' : ''}` },
         h('span', { style: `transform: translateY(${-1 * fontSize * offset}px)` }, grapheme.value),
       )),
     )),

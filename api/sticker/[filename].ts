@@ -10,7 +10,7 @@ export default <VercelApiHandler>async function (req, res) {
   const [text, format] = (req.query.filename as string).split('.') as [string, keyof FormatEnum]
 
   start('render')
-  const renderResult = createSticker(text, { color: req.query.color })
+  const renderResult = createSticker(text, req.query)
   end('render')
 
   switch (format) {

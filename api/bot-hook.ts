@@ -114,13 +114,13 @@ function switchTask (mode?: string) {
   }
 }
 
-async function* createPhrase ({ input, color }: Omit<Args, 'mode'>): AsyncGenerator {
-  const text = input?.[0]
+async function* createPhrase (params: Omit<Args, 'mode'>): AsyncGenerator {
+  const text = params.input?.[0]
 
   // Cache key
-  yield text ? ['phrase', encode(text), color].filter(Boolean).join(':') : null
+  yield text ? ['phrase', encode(text), params.color].filter(Boolean).join(':') : null
   // Sticker buffer
-  yield await createSticker(text, { color }).toBuffer('webp')
+  yield await createSticker(text, params).toBuffer('webp')
 }
 
 async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai', locale }: Omit<Args, 'mode'>): AsyncGenerator {
