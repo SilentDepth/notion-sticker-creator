@@ -118,7 +118,7 @@ async function* createPhrase (params: Omit<Args, 'mode'>): AsyncGenerator {
   const text = params.input?.[0]
 
   // Cache key
-  yield text ? ['phrase', encode(text), params.color].filter(Boolean).join(':') : null
+  yield text ? ['phrase', encode(text), params.layout, params.color].filter(Boolean).join(':') : null
   // Sticker buffer
   yield await createSticker(text, params).toBuffer('webp')
 }
