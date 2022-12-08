@@ -2,7 +2,7 @@ import type { VercelApiHandler } from '@vercel/node'
 import sharp, { type FormatEnum } from 'sharp'
 
 import profiler from '../../shared/profiler'
-import render from '../../shared/renderer'
+import createSticker from '../_utils/sticker'
 
 export default <VercelApiHandler>async function (req, res) {
   const { start, end, result } = profiler()
@@ -10,21 +10,20 @@ export default <VercelApiHandler>async function (req, res) {
   const [text, format] = (req.query.filename as string).split('.') as [string, keyof FormatEnum]
 
   start('render')
-  const svg = await render(text, { color: req.query.color as string })
+  const renderResult = createSticker(text, { color: req.query.color })
   end('render')
 
   switch (format) {
     case 'svg':
       res.setHeader('Content-Type', 'image/svg+xml')
-      res.send(svg)
+      res.send(await renderResult)
       break
     default: {
       start('sharp')
-      const svgBuffer = Buffer.from(svg, 'ascii')
-      const resData = await sharp(svgBuffer).toFormat(format).toBuffer()
+      const buffer = await renderResult.toBuffer(format)
       end('sharp')
       res.setHeader('Content-Type', `image/${format}`)
-      res.send(resData)
+      res.send(buffer)
     }
   }
 

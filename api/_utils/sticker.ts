@@ -2,24 +2,18 @@ import sharp, { type FormatEnum } from 'sharp'
 import render, { type Options } from '../../shared/renderer'
 
 export default function createSticker (input: unknown, options?: Partial<Options>): RenderResult {
-  return _render(input, options)
+  return new RenderResult(resolve => {
+    resolve(render(input, options))
+  })
 }
 
-function _render (input: unknown, options?: Partial<Options>): RenderResult {
-  const result: Partial<RenderResult> = render(input, options)
-
-  result.toBuffer = async function toBuffer (this: RenderResult, format) {
+class RenderResult extends Promise<string> {
+  async toBuffer (format: keyof FormatEnum = 'svg'): Promise<Buffer> {
     const svgBuffer = Buffer.from(await this, 'ascii')
-    if (format && format !== 'svg') {
-      return sharp(svgBuffer).toFormat(format).toBuffer()
-    } else {
+    if (format === 'svg') {
       return svgBuffer
+    } else {
+      return sharp(svgBuffer).toFormat(format).toBuffer()
     }
   }
-
-  return result as RenderResult
-}
-
-interface RenderResult extends Promise<string> {
-  toBuffer: (format?: keyof FormatEnum) => Promise<Buffer>
 }

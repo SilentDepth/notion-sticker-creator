@@ -3,7 +3,7 @@ import { type Component, watch } from 'vue'
 
 const components = import.meta.glob<{ default: Component }>('./dev-components/*.vue')
 
-let current = $ref<string>('./dev-components/calendar.vue')
+let current = $ref<string>('./dev-components/phrase.vue')
 let currentComp = $shallowRef<Component>()
 
 watch($$(current), async value => {
