@@ -30,23 +30,31 @@ interface Props {
 export default function ({ input = '', layout, color = '', padding = 0.25, offset = 17 / 238, style = '' }: Props, debug?: boolean) {
   const graphemes = split(input).slice(0, MAX)
   const colors = color.includes(',') ? color.split(',') : new Array(graphemes.length).fill(color)
+  let rowSize: number
+  let positions: number[]
 
-  if (!layout) {
+  if (layout) {
+    positions = layout.split('').map(Number)
+    rowSize = Math.ceil(Math.sqrt(Math.max(graphemes.length, ...positions)))
+  } else {
+    rowSize = Math.ceil(Math.sqrt(graphemes.length))
     switch (graphemes.length) {
       case 2:
-        layout = '14'
+        positions = [1, 4]
         break
+      default:
+        positions = Array.from({ length: rowSize ** 2 }, (_, idx) => idx + 1)
     }
   }
 
-  const rowSize = Math.ceil(Math.sqrt(graphemes.length))
   type Char = { value: string, color?: string }
-  const cells = layout
-    ? layout.split('').map(Number).reduce((cells, order, idx) => {
+  const cells = positions.reduce(
+    (cells, order, idx) => {
       cells[order - 1] = { value: graphemes[idx], color: colors[idx] || DEFAULT_COLOR }
       return cells
-    }, new Array<Char>(rowSize ** 2).fill(BLANK))
-    : Array.from<never, Char>({ length: rowSize ** 2 }, (_, idx) => ({ value: graphemes[idx] || '', color: colors[idx] || DEFAULT_COLOR }))
+    },
+    new Array<Char>(rowSize ** 2).fill(BLANK),
+  )
   const rows = cells.reduce((groups, grapheme, idx) => {
     if (idx % rowSize === 0) {
       groups.unshift([])
