@@ -73,7 +73,7 @@ type Args = Record<string, string> & { mode: string, input?: string[] }
 function parseArg (input: string): Args | null {
   const MODE_RE = /^\$(\w+)(?:\s+|$)/y
   const [, mode = 'phrase'] = MODE_RE.exec(input) ?? []
-  if (!input || !['phrase', 'calendar'].includes(mode)) {
+  if (!input || !['phrase', 'calendar', 'cal'].includes(mode)) {
     return null
   }
 
@@ -108,6 +108,7 @@ function switchTask (mode?: string) {
     case 'phrase':
       return createPhrase
     case 'calendar':
+    case 'cal':
       return createCalendar
     default:
       return null
