@@ -2,6 +2,7 @@
 import { watch } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
 
+import { sanitize } from '../shared/renderer/utils'
 import NotionSticker from './components/notion-sticker.vue'
 import ColorInput from './components/color-input.vue'
 import AsyncButton from './components/async-button.vue'
@@ -104,7 +105,12 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     NotionSticker(ref="sticker" :input="text" :color="stickerColor" class="mx-auto" style="width: 256px; height: 256px;")
 
   p(class="text-neutral-400") 1. 输入贴纸文字（最多 {{ MAX }} 个字符）
-  input(v-model="text" type="text" class="flex-none box-content w-[9em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
+  input(
+    :value="text"
+    type="text"
+    class="flex-none box-content w-[9em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500"
+    @input="text = sanitize($event.target.value)"
+  )
 
   p(class="text-neutral-400") 2. 设置文字颜色
   div(class="grid gap-px" :style="colorMatrixStyle")

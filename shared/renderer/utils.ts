@@ -1,5 +1,17 @@
+/**
+ * Remove Unicode Variation Selectors from user input
+ *
+ * Unicode Variation Selectors (U+FE00-FE0F) are used to mark some symbols for OS
+ * to be rendered as emojis. We currently don't support emojis. So there is no
+ * reason to allow this behavior since those original symbols may be rendered
+ * without any issue.
+ */
+export function sanitize (input: string): string {
+  return input.split('').filter(c => c.charCodeAt(0) < 0xFE00 || 0xFE0F < c.charCodeAt(0)).join('')
+}
+
 export function split (text: string): string[] {
-  return Intl.Segmenter ? [...new Intl.Segmenter().segment(text)].map(s => s.segment) : text.split('')
+  return [...new Intl.Segmenter().segment(text)].map(s => s.segment)
 }
 
 interface SatoriNode {

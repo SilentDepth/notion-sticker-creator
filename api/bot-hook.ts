@@ -4,6 +4,7 @@ import profiler from '../shared/profiler'
 import * as deta from './_utils/deta'
 import * as telegram from './_utils/telegram'
 import createSticker from './_utils/sticker'
+import { sanitize } from '../shared/renderer/utils'
 import weekdayColors from '../shared/renderer/weekday-colors'
 
 export default <VercelApiHandler>async function (req, res) {
@@ -116,7 +117,8 @@ function switchTask (mode?: string) {
 }
 
 async function* createPhrase (params: Omit<Args, 'mode'>): AsyncGenerator {
-  const text = params.input?.[0]
+  const text = sanitize(params.input?.[0])
+  delete params.input
 
   // Cache key
   yield text ? ['phrase', encode(text), params.layout, params.color].filter(Boolean).join(':') : null

@@ -2,6 +2,7 @@ import type { VercelApiHandler } from '@vercel/node'
 import sharp, { type FormatEnum } from 'sharp'
 
 import profiler from '../../shared/profiler'
+import { sanitize } from '../../shared/renderer/utils'
 import createSticker from '../_utils/sticker'
 
 export default <VercelApiHandler>async function (req, res) {
@@ -10,7 +11,7 @@ export default <VercelApiHandler>async function (req, res) {
   const [text, format] = (req.query.filename as string).split('.') as [string, keyof FormatEnum]
 
   start('render')
-  const renderResult = createSticker(text, req.query)
+  const renderResult = createSticker(sanitize(text), req.query)
   end('render')
 
   switch (format) {
