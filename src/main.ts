@@ -2,6 +2,7 @@ import '@unocss/reset/tailwind.css'
 import 'uno.css'
 import { createApp } from 'vue'
 
+import { polyfillIntlSegmenter, supportIntlSegmenter } from './libs/feature-detect'
 import App from './app.vue'
 import Dev from './dev.vue'
 import Design from './design.vue'
@@ -23,4 +24,7 @@ if (import.meta.env.DEV) {
   root = App
 }
 
+if (!supportIntlSegmenter()) {
+  await polyfillIntlSegmenter()
+}
 createApp(root).mount('#app')

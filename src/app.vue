@@ -4,7 +4,7 @@ import { watch } from 'vue'
 import NotionSticker from './components/notion-sticker.vue'
 import ColorInput from './components/color-input.vue'
 import AsyncButton from './components/async-button.vue'
-import { canCreateWebpDataURL } from './libs/feature-detect'
+import { supportCanvasWebpDataURL } from './libs/feature-detect'
 
 const MAX = 9
 
@@ -57,7 +57,7 @@ function generateCanvas ($svg: SVGSVGElement) {
 
 function download (format: string) {
   const a = document.createElement('a')
-  a.href = canCreateWebpDataURL()
+  a.href = supportCanvasWebpDataURL()
     ? generateCanvas(sticker!.$el.querySelector('svg')).toDataURL(`image/${format}`)
     : `/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(stickerColor)}`
   a.download = `notion-sticker.${format}`
