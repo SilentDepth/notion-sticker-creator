@@ -24,7 +24,9 @@ if (import.meta.env.DEV) {
   root = App
 }
 
-if (!supportIntlSegmenter()) {
-  await polyfillIntlSegmenter()
-}
-createApp(root).mount('#app')
+void async function main () {
+  if (!supportIntlSegmenter()) {
+    await polyfillIntlSegmenter()
+  }
+  createApp(root).mount('#app')
+}()
