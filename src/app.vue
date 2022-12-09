@@ -4,6 +4,7 @@ import { watch } from 'vue'
 import NotionSticker from './components/notion-sticker.vue'
 import ColorInput from './components/color-input.vue'
 import AsyncButton from './components/async-button.vue'
+import { canCreateWebpDataURL } from './libs/feature-detect'
 
 const MAX = 9
 
@@ -11,6 +12,7 @@ let sticker = $ref<typeof NotionSticker>()
 let text = $ref('你好世界')
 let colors = $ref(['#000000'])
 let multiColor = $ref(false)
+const stickerColor = $computed(() => multiColor ? colors.join(',') : colors[0])
 
 const graphemes = $computed(() => Intl.Segmenter ? [...new Intl.Segmenter().segment(text)] : text.split(''))
 const colorMatrixSize = $computed(() => multiColor ? Math.ceil(Math.sqrt(graphemes.length)) : 1)
@@ -55,7 +57,9 @@ function generateCanvas ($svg: SVGSVGElement) {
 
 function download (format: string) {
   const a = document.createElement('a')
-  a.href = generateCanvas(sticker!.$el.querySelector('svg')).toDataURL(`image/${format}`)
+  a.href = canCreateWebpDataURL()
+    ? generateCanvas(sticker!.$el.querySelector('svg')).toDataURL(`image/${format}`)
+    : `/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(stickerColor)}`
   a.download = `notion-sticker.${format}`
   a.click()
   a.remove()
@@ -86,7 +90,7 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
 
   div(class="py-5 sticky top-0")
-    NotionSticker(ref="sticker" :input="text" :color="multiColor ? colors.join(',') : colors[0]" style="width: 256px; height: 256px;")
+    NotionSticker(ref="sticker" :input="text" :color="stickerColor" style="width: 256px; height: 256px;")
 
   p(class="text-neutral-400") 1. 输入贴纸文字（最多 {{ MAX }} 个字符）
   input(v-model="text" type="text" class="flex-none box-content w-[9em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
@@ -105,7 +109,7 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     input(v-model="multiColor" type="checkbox" class="mr-2")
     span(class="text-neutral-200") 分别设置颜色
 
-  p(class="text-neutral-400") 3. 获取图像（iOS 不支持生成为 WebP）
+  p(class="text-neutral-400") 3. 获取图像
   div(class="grid grid-cols-[auto_1fr_1fr] items-center gap-y-5")
     span(class="mr-4 text-neutral-200") PNG 格式
     button(type="button" class="px-[1em] py-[0.25em] bg-blue-600 text-white rounded-l hover:bg-blue-500 mr-px" @click="download('png')") 下载
