@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { watch } from 'vue'
+import { useIntersectionObserver } from '@vueuse/core'
 
 import NotionSticker from './components/notion-sticker.vue'
 import ColorInput from './components/color-input.vue'
@@ -81,6 +82,15 @@ async function copyCommand () {
   ].filter(Boolean).join(' ')
   await navigator.clipboard.writeText(command)
 }
+
+// Show border when the sticker goes sticky
+
+let stickyRef = $ref<HTMLDivElement>()
+let isStickyTriggered = $ref(false)
+
+useIntersectionObserver($$(stickyRef), ([{ isIntersecting }]) => {
+  isStickyTriggered = !isIntersecting
+})
 </script>
 
 <template lang="pug">
@@ -89,8 +99,9 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     img(src="/icon.png" class="mx-auto" style="width: 64px; height: 64px;")
     h1(class="mt-2 font-bold text-center" style="font-family: 'Noto Serif SC';") Notion 贴纸生成器
 
-  div(class="py-5 sticky top-0")
-    NotionSticker(ref="sticker" :input="text" :color="stickerColor" style="width: 256px; height: 256px;")
+  div(ref="stickyRef" class="translate-y-5" style="margin: 0; height: 0")
+  div(:class="['w-full py-5 bg-black/50 backdrop-blur border-b transition duration-200 sticky top-0 z-1', isStickyTriggered ? 'border-neutral-800' : 'border-transparent']")
+    NotionSticker(ref="sticker" :input="text" :color="stickerColor" class="mx-auto" style="width: 256px; height: 256px;")
 
   p(class="text-neutral-400") 1. 输入贴纸文字（最多 {{ MAX }} 个字符）
   input(v-model="text" type="text" class="flex-none box-content w-[9em] px-[1em] py-[0.25em] text-lg bg-neutral-800 text-white border border-neutral-600 rounded outline-none text-center focus:border-neutral-500")
@@ -107,7 +118,7 @@ div(class="min-h-screen py-10 bg-black flex flex-col items-center space-y-5")
     )
   label(class="mt-2! flex items-center")
     input(v-model="multiColor" type="checkbox" class="mr-2")
-    span(class="text-neutral-200") 分别设置颜色
+    span(class="text-neutral-200") 逐字设定颜色
 
   p(class="text-neutral-400") 3. 获取图像
   div(class="grid grid-cols-[auto_1fr_1fr] items-center gap-y-5")
