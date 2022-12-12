@@ -21,5 +21,5 @@ export async function getItem (key: string): Promise<CacheItem | null> {
 }
 
 export async function insertItem (item: any): Promise<void> {
-  await http.post('stickers/items', { ...item, created_at: Date.now() })
+  await http.post('stickers/items', { item: { ...item, created_at: Date.now() } })
 }
