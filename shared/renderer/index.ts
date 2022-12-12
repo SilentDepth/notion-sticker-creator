@@ -55,7 +55,7 @@ export default async function render<T = unknown> (input: T, arg1?: boolean | Pa
             // See https://github.com/lovell/sharp/issues/1378
             // TODO: find an other way
             const { default: sharp } = await import('sharp')
-            const pngBuffer = await sharp(Buffer.from(svg, 'ascii')).toFormat('png').toBuffer()
+            const pngBuffer = await sharp(Buffer.from(svg, 'ascii')).resize({ width: 512, height: 512 }).toFormat('png').toBuffer()
             return `data:image/png;base64,${pngBuffer.toString('base64')}`
           }
         }
