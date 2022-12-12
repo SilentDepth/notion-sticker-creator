@@ -11,6 +11,7 @@ http.interceptors.response.use(res => res.data)
 interface CacheItem {
   key: string
   sticker_file_id: string
+  created_at: number
 }
 
 export async function getItem (key: string): Promise<CacheItem | null> {
@@ -20,5 +21,5 @@ export async function getItem (key: string): Promise<CacheItem | null> {
 }
 
 export async function insertItem (item: any): Promise<void> {
-  await http.post('stickers/items', { item })
+  await http.post('stickers/items', { ...item, created_at: Date.now() })
 }
