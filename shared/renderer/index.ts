@@ -1,4 +1,5 @@
 import satori from 'satori'
+import axios from 'axios'
 
 import loadAssets from './load-assets'
 import Sticker, { type Template } from './sticker'
@@ -41,7 +42,22 @@ export default async function render<T = unknown> (input: T, arg1?: boolean | Pa
       async loadAdditionalAsset (code: string, segment: string) {
         if (code === 'emoji') {
           const codePoint = [...segment].map(s => s.codePointAt(0)!).filter(c => c < 0xFE00 || 0xFE0F < c).map(c => c.toString(16).padStart(4, '0')).join('_')
-          return `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${codePoint}.svg`
+          const { data: svg } = await axios(`https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${codePoint}.svg`, { responseType: 'text' })
+          // For browsers
+          if (typeof window !== 'undefined') {
+            return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`
+          }
+          // For Node.js
+          else {
+            // There's a limitation in Sharp to render nested SVG properly. So this is a
+            // workaround that pre-convert the SVG image to PNG to make it a plain image.
+            // This may hurt the performance, but we don't have other solution.
+            // See https://github.com/lovell/sharp/issues/1378
+            // TODO: find an other way
+            const { default: sharp } = await import('sharp')
+            const pngBuffer = await sharp(Buffer.from(svg, 'ascii')).toFormat('png').toBuffer()
+            return `data:image/png;base64,${pngBuffer.toString('base64')}`
+          }
         }
       },
     },
