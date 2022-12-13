@@ -1,12 +1,14 @@
 import { h } from './utils'
 import Phrase from './templates/phrase'
 import Calendar from './templates/calendar'
+import CssIsAwesome from './templates/css-is-awesome'
 
-export type Template = 'phrase' | 'calendar'
+export type Template = 'phrase' | 'calendar' | 'css-is-awesome'
 
 const Template: Record<Template, Function> = {
   phrase: Phrase,
   calendar: Calendar,
+  'css-is-awesome': CssIsAwesome,
 }
 
 interface Props<T> {

@@ -117,13 +117,20 @@ function switchTask (mode?: string) {
 }
 
 async function* createPhrase (params: Omit<Args, 'mode'>): AsyncGenerator {
-  const text = sanitize(params.input?.[0])
-  delete params.input
+  if (params.input?.slice(0, 3).join(' ') === 'css is awesome') {
+    // Cache key
+    yield 'css-is-awesome'
+    // Sticker buffer
+    yield await createSticker(null, { template: 'css-is-awesome' }).toBuffer('webp')
+  } else {
+    const text = sanitize(params.input?.[0])
+    delete params.input
 
-  // Cache key
-  yield text ? ['phrase', encode(text), params.layout, params.color].filter(Boolean).join(':') : null
-  // Sticker buffer
-  yield await createSticker(text, params).toBuffer('webp')
+    // Cache key
+    yield text ? ['phrase', encode(text), params.layout, params.color].filter(Boolean).join(':') : null
+    // Sticker buffer
+    yield await createSticker(text, params).toBuffer('webp')
+  }
 }
 
 async function* createCalendar ({ input, color, timezone = 'Asia/Shanghai', locale }: Omit<Args, 'mode'>): AsyncGenerator {

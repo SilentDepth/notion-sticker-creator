@@ -17,13 +17,13 @@ div(class="min-h-screen bg-neutral-700 text-gray-200 flex flex-col justify-cente
     :style="{ transform: stickerMode ? `scale(${208 / 512})` : null }"
   )
     div(
-      class="flex flex-col justify-center items-center"
+      class="flex flex-col items-start"
       style="width: 316px; height: 316px; line-height: 1; transform-origin: top left"
-      :style="{ transform: transform ? 'translate(128px, 151px) scaleY(0.943) skewY(-3.52deg)' : null, background: transform ? null : 'white' }"
+      :style="{ transform: transform ? 'translate(128px, 151px) scaleY(0.943) skewY(-3.52deg)' : null, background: transform ? null : 'white', fontSize: '124px' }"
     )
-      span.debug(style="font-size: 50px"): span {{ year }} · {{ month }}
-      span.debug(style="margin: 7px 0; color: crimson; font-size: 150px"): span {{ dateOfMonth }}
-      span.debug(style="font-size: 50px"): span 星期{{ weekday }}
+      span.debug(class="flex items-center") CSS
+      span.debug(class="my-auto flex items-center") IS
+      span.debug(class="flex items-center") AWESOME
   div(class="flex items-center gap-4")
     label(class="flex items-center gap-2")
       input(v-model="stickerMode" type="checkbox")
