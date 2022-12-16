@@ -15,14 +15,14 @@ void async function main () {
   while (true) {
     try {
       const { data } = await http.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getUpdates`, {
-        offset: lastUpdateId,
+        offset: lastUpdateId + 1,
         allowed_updates: ['message', 'inline_query'],
       })
       if (data.ok) {
         for (const update of data.result) {
           console.log(update)
           await http.post(`http://localhost:${PORT}/api/bot-hook`, update)
-          lastUpdateId = update.update_id + 1
+          lastUpdateId = update.update_id
         }
       } else {
         throw new Error(data)

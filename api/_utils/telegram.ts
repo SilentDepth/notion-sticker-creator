@@ -1,7 +1,8 @@
 import axios from 'axios'
 import FormData from 'form-data'
 
-const DRIVE_CHAT_ID = process.env.TG_CHAT_DRIVE
+const DRIVE_CHAT_ID = process.env.TG_CHAT_DRIVE!
+const TESTER_CHATS = (process.env.TG_CHAT_TESTER?.split(',') ?? []).concat(DRIVE_CHAT_ID).map(s => Number(s))
 
 const http = axios.create({
   baseURL: `https://api.telegram.org/bot${process.env.TG_BOT_TOKEN}/`,
@@ -34,6 +35,16 @@ export async function answerInlineQuery (queryId: string, resultId: string, file
     }],
     cache_time: process.env.NODE_ENV === 'development' ? 0 : undefined,
   })
+}
+
+export async function isTester (userId: number): Promise<boolean> {
+  for (const chatId of TESTER_CHATS) {
+    try {
+      await http.post('getChatMember', { chat_id: chatId, user_id: userId })
+      return true
+    } catch {}
+  }
+  return false
 }
 
 type TgMessage<T> = {
