@@ -1,10 +1,11 @@
 import satori from 'satori'
-import { type FormatEnum } from 'sharp'
+import type { FormatEnum } from 'sharp'
 import axios from 'axios'
 
 import type { StickerType } from './sticker-types'
 import { IMAGE_FRAME, FONT_NOTO_SERIF_SC } from './assets'
-import { h, IS_BROWSER, type SatoriNode } from './utils'
+import { h, IS_BROWSER } from './utils'
+import type { SatoriNode } from './utils'
 
 const sharp = IS_BROWSER ? null as never : require('sharp')
 

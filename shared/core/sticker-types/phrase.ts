@@ -89,7 +89,7 @@ export default class PhraseSticker extends Sticker {
     if (params.text.startsWith('#')) {
       const [, text = '', rotate = ''] = params.text.match(/^#(.+)(?!\\)\$(r?)$/us) ?? []
       const graphemes = split(text)
-      const tokens = []
+      const tokens = [] as string[]
       for (let i = 0, max = graphemes.length - 1; i <= max; i++) {
         switch (graphemes[i]) {
           case '\\':
@@ -118,7 +118,7 @@ export default class PhraseSticker extends Sticker {
             tokens.push(graphemes[i])
         }
       }
-      const chars = [] as Array<string | object>
+      const chars = [] as Array<Grapheme | '\n' | '\\n'>
       let color: string = '#000000'
       for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i]
@@ -149,10 +149,14 @@ export default class PhraseSticker extends Sticker {
           }
         }
         else {
-          chars.push(color ? { value: token, color: /\s/.test(token) ? '#000000' : color } : token)
+          chars.push(
+            color
+              ? { value: token, color: /\s/.test(token) ? '#000000' : color }
+              : { value: token, color: '#000000' }
+          )
         }
       }
-      let rows = chars.reduce((rows, char) => {
+      let rows = chars.reduce<Grapheme[][]>((rows, char) => {
         const row = rows[0]
         if (char === '\n' || char === '\\n') {
           rows.unshift([])
@@ -160,7 +164,7 @@ export default class PhraseSticker extends Sticker {
           row.push(char)
         }
         return rows
-      }, [[]] as Array<Array<string | object>>).reverse()
+      }, [[]]).reverse()
       const maxRowSize = Math.max(...rows.map(row => row.length))
       rows.forEach(row => {
         row.push(...new Array(maxRowSize - row.length).fill(BLANK))
