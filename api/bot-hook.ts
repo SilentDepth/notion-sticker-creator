@@ -53,7 +53,7 @@ async function handleInlineQuery (update: any): Promise<void> {
         if (text === 'css' && Array.prototype.slice.call(args, 0, 3).join(' ') === 'css is awesome') {
           sticker = createSticker('css-is-awesome')
         } else {
-          const testerMode = await telegram.isTester(update.inline_query.from.id)
+          const testerMode = process.env.NODE_ENV === 'development' ? true : await telegram.isTester(update.inline_query.from.id)
           sticker = createSticker('phrase', { ...params, text, max: testerMode ? Infinity : undefined })
         }
       }
@@ -70,7 +70,7 @@ async function handleInlineQuery (update: any): Promise<void> {
   }
 
   // Check if the same sticker has been created
-  const cache = await deta.getItem(sticker.key)
+  const cache = await deta.getItem(sticker.key).catch(() => null)
   if (cache) {
     await telegram.answerInlineQuery(queryId, '0', cache.sticker_file_id)
   } else {
@@ -78,7 +78,7 @@ async function handleInlineQuery (update: any): Promise<void> {
     const fileId = await telegram.sendSticker(stickerBuffer)
     await Promise.all([
       telegram.answerInlineQuery(queryId, '0', fileId),
-      deta.insertItem({ key: sticker.key, sticker_file_id: fileId })
+      deta.insertItem({ key: sticker.key, sticker_file_id: fileId }).catch(() => {})
     ])
   }
 }
