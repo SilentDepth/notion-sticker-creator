@@ -1,5 +1,5 @@
 import Sticker from '../sticker'
-import { encodeBase64url, h, sanitize, split } from '../utils'
+import { h, sanitize, split } from '../utils'
 
 interface Params {
   text: string
@@ -42,11 +42,11 @@ export default class PhraseSticker extends Sticker {
   }
 
   get key (): string {
-    this._key ??= [
-      this.type,
-      encodeBase64url(this.graphemes.map(g => g.value).join('')),
-      this.graphemes.map(g => g.color).join(','),
-    ].join(Sticker.KEY_SEPARATOR)
+    this._key ??= JSON.stringify({
+      type: this.type,
+      text: this.graphemes.map(g => g.value).join(''),
+      color: this.graphemes.map(g => g.color).join(','),
+    })
     return this._key
   }
 

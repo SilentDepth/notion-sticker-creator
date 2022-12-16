@@ -30,13 +30,13 @@ export default class CalendarSticker extends Sticker {
   }
 
   get key (): string {
-    this._key ??= [
-      this.type,
-      [this.date.getFullYear(), String(this.date.getMonth() + 1).padStart(2, '0'), String(this.date.getDate()).padStart(2, '0')].join('-'),
+    this._key ??= JSON.stringify({
+      type: this.type,
+      date: [this.date.getFullYear(), String(this.date.getMonth() + 1).padStart(2, '0'), String(this.date.getDate()).padStart(2, '0')].join('-'),
       // TODO: normalize color
-      this.color,
-      this.locale,
-    ].join(Sticker.KEY_SEPARATOR)
+      color: this.color,
+      locale: this.locale,
+    })
     return this._key
   }
 

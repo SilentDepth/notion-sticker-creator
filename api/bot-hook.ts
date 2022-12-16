@@ -3,6 +3,7 @@ import type { VercelApiHandler } from '@vercel/node'
 import createSticker from '../shared/core'
 import * as deta from './_utils/deta'
 import * as telegram from './_utils/telegram'
+import { md5 } from './_utils/hash'
 
 export default <VercelApiHandler>async function (req, res) {
   const updateType = getUpdateType(req.body)
@@ -70,7 +71,8 @@ async function handleInlineQuery (update: any): Promise<void> {
   }
 
   // Check if the same sticker has been created
-  const cache = await deta.getItem(sticker.key).catch(() => null)
+  const cacheKey = md5(sticker.key)
+  const cache = await deta.getItem(cacheKey).catch(() => null)
   if (cache) {
     await telegram.answerInlineQuery(queryId, '0', cache.sticker_file_id)
   } else {
@@ -78,7 +80,7 @@ async function handleInlineQuery (update: any): Promise<void> {
     const fileId = await telegram.sendSticker(stickerBuffer)
     await Promise.all([
       telegram.answerInlineQuery(queryId, '0', fileId),
-      deta.insertItem({ key: sticker.key, sticker_file_id: fileId }).catch(() => {})
+      deta.insertItem({ key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId }).catch(() => {})
     ])
   }
 }

@@ -52,8 +52,6 @@ export default abstract class Sticker {
     })
   }
 
-  static KEY_SEPARATOR = ':'
-
   static async frame (content: SatoriNode | SatoriNode[] | null, debug?: boolean): Promise<SatoriNode> {
     return h('div', { style: 'display: flex; width: 100%; height: 100%' }, [
       debug ? null : h('img', { src: await IMAGE_FRAME, width: '100%', height: '100%', style: 'position: absolute; top: 0; left: 0' }),
