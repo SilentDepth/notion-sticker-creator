@@ -80,7 +80,7 @@ async function handleInlineQuery (update: any): Promise<void> {
     const fileId = await telegram.sendSticker(stickerBuffer)
     await Promise.all([
       telegram.answerInlineQuery(queryId, '0', fileId),
-      deta.insertItem({ key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId }).catch(() => {})
+      deta.putItem({ key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId }).catch(() => {})
     ])
   }
 }
