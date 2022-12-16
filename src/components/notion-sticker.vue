@@ -1,38 +1,35 @@
 <script lang="ts" setup>
-import { type PropType, useAttrs, watch } from 'vue'
+import { watch, type PropType } from 'vue'
 
-import render, { type Template } from '../../shared/renderer'
+import createSticker, { type StickerType } from '../../shared/core'
 
 const props = defineProps({
-  input: {
-    type: null,
-    default: '',
-  },
-  size: {
-    type: Number,
-    default: 512,
-  },
   template: {
-    type: String as PropType<Template>,
-    default: undefined,
+    type: String as PropType<StickerType>,
+    default: 'phrase',
+  },
+  params: {
+    type: null,
+    default: () => ({}),
   },
   debug: {
     type: Boolean,
     default: false,
   },
 })
+const emit = defineEmits(['update:instance'])
 
-const attrs = useAttrs()
-
+let sticker = $ref<ReturnType<typeof createSticker>>()
 let svg = $ref('')
 
-watch(() => [props, attrs], async () => {
-  svg = await render(props.input, {
-    size: props.size,
-    template: props.template,
-    ...attrs,
-  }, props.debug)
-}, { immediate: true, deep: true })
+watch($$(sticker), value => {
+  emit('update:instance', value)
+})
+
+watch(props, async () => {
+  sticker = createSticker(props.template, props.params)
+  svg = await sticker.render(props.debug)
+}, { immediate: true })
 </script>
 
 <template lang="pug">

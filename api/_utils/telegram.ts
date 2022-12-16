@@ -32,6 +32,7 @@ export async function answerInlineQuery (queryId: string, resultId: string, file
       id: resultId,
       sticker_file_id: fileId,
     }],
+    cache_time: process.env.NODE_ENV === 'development' ? 0 : undefined,
   })
 }
 

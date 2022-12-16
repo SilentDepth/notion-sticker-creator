@@ -1,20 +1,30 @@
+export const isBrowser = new Function('try { return this === window } catch { return false }')
+export const IS_BROWSER = new Function('try { return this === window } catch { return false }')()
+
 /**
  * Remove Unicode Variation Selectors from user input
  *
  * Unicode Variation Selectors (U+FE00-FE0F) are used to mark some symbols for OS
- * to be rendered as emojis. We currently don't support emojis. So there is no
- * reason to allow this behavior since those original symbols may be rendered
- * without any issue.
+ * to be rendered as emojis. But sometimes we actually need the symbol version, not
+ * the emoji. So we need to remove the mark in these cases.
  */
 export function sanitize (input: string): string {
   return input.split('').filter(c => c.charCodeAt(0) < 0xFE00 || 0xFE0F < c.charCodeAt(0)).join('')
+}
+
+export function encodeBase64url (text: string): string {
+  if (IS_BROWSER) {
+    return text
+  } else {
+    return Buffer.from(text).toString('base64url')
+  }
 }
 
 export function split (text: string): string[] {
   return [...new Intl.Segmenter().segment(text)].map(s => s.segment)
 }
 
-interface SatoriNode {
+export interface SatoriNode {
   type: string
   props: Record<string, any>
 }

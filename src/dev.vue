@@ -29,4 +29,10 @@ div::v-deep(input) {
   padding: 0 4px;
   color: black;
 }
+
+div::v-deep(button) {
+  padding: 0 4px;
+  background: #fff;
+  color: #000;
+}
 </style>

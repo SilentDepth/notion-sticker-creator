@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite --host --port 3000",
+    "dev:api": "vc dev",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "packageManager": "pnpm@7.17.0",
   "dependencies": {
@@ -22,11 +25,13 @@
     "@types/sharp": "^0.31.0",
     "@vercel/node": "^2.8.0",
     "@vitejs/plugin-vue": "^4.0.0",
+    "@vitest/coverage-c8": "^0.25.7",
     "dotenv": "^16.0.3",
     "pug": "^3.0.2",
     "typescript": "^4.9.4",
     "unocss": "^0.47.5",
     "vite": "^4.0.0",
+    "vitest": "^0.25.7",
     "vue-tsc": "^1.0.12"
   },
   "pnpm": {

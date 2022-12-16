@@ -2,16 +2,18 @@
 import NotionSticker from '../components/notion-sticker.vue'
 import { reactive } from 'vue'
 
+let sticker = $shallowRef<any>()
 let debug = $ref(false)
-let date = $ref<string>()
 const params = reactive({
+  date: undefined,
   color: undefined,
   locale: undefined,
 })
 </script>
 
 <template lang="pug">
-NotionSticker(template="calendar" :input="date" :color="params.color" :locale="params.locale" :debug="debug")
+NotionSticker(template="calendar" :params="params" :debug="debug" @update:instance="sticker = $event")
+pre &ZeroWidthSpace;{{ sticker?.key }}
 div(class="flex items-start gap-2")
   label(class="flex flex-col gap-2")
     code(class="text-sm") &ZeroWidthSpace;
@@ -20,7 +22,7 @@ div(class="flex items-start gap-2")
       span Debug
   label(class="flex flex-col gap-2")
     code(class="text-sm") date
-    input(v-model="date" type="date")
+    input(v-model="params.date" type="date")
   label(class="flex flex-col gap-2")
     code(class="text-sm") color
     input(v-model="params.color" type="color")

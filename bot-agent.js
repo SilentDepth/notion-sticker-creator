@@ -16,7 +16,7 @@ void async function main () {
     try {
       const { data } = await http.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getUpdates`, {
         offset: lastUpdateId,
-        allowed_updates: ['inline_query'],
+        allowed_updates: ['message', 'inline_query'],
       })
       if (data.ok) {
         for (const update of data.result) {

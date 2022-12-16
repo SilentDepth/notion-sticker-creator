@@ -1,32 +1,34 @@
 import type { VercelApiHandler } from '@vercel/node'
-import sharp, { type FormatEnum } from 'sharp'
+import type { FormatEnum } from 'sharp'
 
-import profiler from '../../shared/profiler'
-import { sanitize } from '../../shared/renderer/utils'
-import createSticker from '../_utils/sticker'
+import createSticker from '../../shared/core'
+
+interface RequestQuery {
+  filename: string
+  color?: string
+}
 
 export default <VercelApiHandler>async function (req, res) {
-  const { start, end, result } = profiler()
+  const { filename, color } = req.query as unknown as RequestQuery
+  const [text, format = 'webp'] = filename.split('.') as [string, keyof FormatEnum]
 
-  const [text, format] = (req.query.filename as string).split('.') as [string, keyof FormatEnum]
+  if (!text) return end()
 
-  start('render')
-  const renderResult = createSticker(sanitize(text), req.query)
-  end('render')
-
+  const sticker = createSticker('phrase', { text, color })
   switch (format) {
     case 'svg':
       res.setHeader('Content-Type', 'image/svg+xml')
-      res.send(await renderResult)
+      res.send(await sticker.render())
       break
-    default: {
-      start('sharp')
-      const buffer = await renderResult.toBuffer(format)
-      end('sharp')
+    default:
       res.setHeader('Content-Type', `image/${format}`)
-      res.send(buffer)
-    }
+      res.send(await sticker.render().toBuffer(format))
   }
 
-  console.log({ profile: 'sticker', text, ...result() })
+  return end()
+
+  function end () {
+    res.status(204)
+    res.end()
+  }
 }
