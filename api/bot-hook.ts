@@ -70,7 +70,7 @@ async function handleInlineQuery (update: any): Promise<void> {
       return
   }
 
-  // Check if the same sticker has been created
+  // Check if the same sticker was created already
   const cacheKey = md5(sticker.key)
   const cache = await deta.getItem(cacheKey).catch(() => null)
   if (cache) {
