@@ -1,6 +1,6 @@
 import Sticker from './sticker'
 import { CssIsAwesomeSticker, StickerClass, StickerParams, StickerType } from './sticker-types'
-import { PhraseSticker, CalendarSticker } from './sticker-types'
+import { PhraseSticker, CalendarSticker, NotionLogoSticker } from './sticker-types'
 
 export * from './sticker-types'
 
@@ -13,6 +13,8 @@ export default function createSticker (type: StickerType, params?: any): Sticker
       return new CalendarSticker(params)
     case 'css-is-awesome':
       return new CssIsAwesomeSticker()
+    case 'notion':
+      return new NotionLogoSticker()
     default:
       throw new Error('Unsupported sticker type')
   }

@@ -7,7 +7,7 @@ export default class CssIsAwesomeSticker extends Sticker {
   }
 
   get key (): string {
-    return 'css-is-awesome'
+    return JSON.stringify({ type: this.type })
   }
 
   renderNode (debug?: boolean) {

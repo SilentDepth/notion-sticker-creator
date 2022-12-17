@@ -51,11 +51,19 @@ async function handleInlineQuery (update: any): Promise<void> {
         return
       } else {
         const { 0: text, ...params } = args
-        if (text === 'css' && Array.prototype.slice.call(args, 0, 3).join(' ') === 'css is awesome') {
-          sticker = createSticker('css-is-awesome')
-        } else {
-          const testerMode = process.env.NODE_ENV === 'development' ? true : await telegram.isTester(update.inline_query.from.id)
-          sticker = createSticker('phrase', { ...params, text, max: testerMode ? Infinity : undefined })
+        switch (true) {
+          case text === 'css' && Array.prototype.join.call(args, ' ') === 'css is awesome':
+            sticker = createSticker('css-is-awesome')
+            break
+          case text === 'notion' && Array.prototype.join.call(args, ' ') === 'notion logo':
+            sticker = createSticker('notion')
+            break
+          default:
+            sticker = createSticker('phrase', {
+              ...params,
+              text,
+              max: (process.env.NODE_ENV === 'development' ? true : await telegram.isTester(update.inline_query.from.id)) ? Infinity : undefined,
+            })
         }
       }
       break
