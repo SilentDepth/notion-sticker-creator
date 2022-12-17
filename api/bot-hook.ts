@@ -39,7 +39,7 @@ function getUpdateType (update: object): string {
 async function handleMessage (update: any): Promise<void> {}
 
 async function handleInlineQuery (update: any): Promise<void> {
-  const queryId = update.inline_query.id as string
+  const queryId = update.inline_query.id as number
   const queryText = update.inline_query.query as string
 
   const [$, args] = parseQuery(queryText) ?? []
@@ -77,7 +77,7 @@ async function handleInlineQuery (update: any): Promise<void> {
     await telegram.answerInlineQuery(queryId, cacheKey, cache.sticker_file_id)
   } else {
     const stickerBuffer = await sticker.render().toBuffer('webp')
-    const fileId = await telegram.sendSticker(stickerBuffer)
+    const fileId = await telegram.sendSticker(stickerBuffer, queryId)
     await Promise.all([
       telegram.answerInlineQuery(queryId, cacheKey, fileId),
       deta.putItem({ key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId }).catch(() => {})

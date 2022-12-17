@@ -13,23 +13,20 @@ http.interceptors.response.use(
 )
 
 /**
- * @param buffer - Sticker buffer
+ * @param buffer     - Sticker buffer
+ * @param randomSeed - The seed to decide which drive chat to use
  * @returns Sticker file ID returned by Telegram
  */
-export async function sendSticker (buffer: Buffer): Promise<string> {
+export async function sendSticker (buffer: Buffer, randomSeed: number): Promise<string> {
   const form = new FormData()
-  form.append('chat_id', DRIVE_CHATS[random(DRIVE_CHATS.length)])
+  form.append('chat_id', DRIVE_CHATS[randomSeed % DRIVE_CHATS.length])
   form.append('sticker', buffer, 'sticker.webp')
 
   const message = await http.postForm<never, TgMessage<'sticker'>>('sendSticker', form)
   return message.sticker.file_id
 }
 
-function random (size: number): number {
-  return Math.floor(Math.random() * size)
-}
-
-export async function answerInlineQuery (queryId: string, resultId: string, fileId: string) {
+export async function answerInlineQuery (queryId: number, resultId: string, fileId: string) {
   await http.post('answerInlineQuery', {
     inline_query_id: queryId,
     results: [{
