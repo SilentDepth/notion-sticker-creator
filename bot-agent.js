@@ -21,14 +21,16 @@ void async function main () {
       if (data.ok) {
         for (const update of data.result) {
           console.log(update)
-          await http.post(`http://localhost:${PORT}/api/bot-hook`, update)
+          try {
+            await http.post(`http://localhost:${PORT}/api/bot-hook`, update)
+          } catch {}
           lastUpdateId = update.update_id
         }
       } else {
         throw new Error(data)
       }
     } catch (err) {
-      console.error(err.config ?? err)
+      console.error(err.response?.data ?? 'No response error')
     }
   }
 }()
