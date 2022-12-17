@@ -11,8 +11,8 @@
   },
   "packageManager": "pnpm@7.17.0",
   "dependencies": {
-    "@unocss/reset": "^0.47.5",
-    "@vueuse/core": "^9.6.0",
+    "@unocss/reset": "^0.47.6",
+    "@vueuse/core": "^9.7.0",
     "axios": "^1.2.1",
     "form-data": "^4.0.0",
     "intl-segmenter-polyfill": "^0.4.4",
@@ -21,18 +21,18 @@
     "vue": "^3.2.45"
   },
   "devDependencies": {
-    "@types/node": "^18.11.12",
+    "@types/node": "^18.11.16",
     "@types/sharp": "^0.31.0",
-    "@vercel/node": "^2.8.0",
+    "@vercel/node": "^2.8.1",
     "@vitejs/plugin-vue": "^4.0.0",
-    "@vitest/coverage-c8": "^0.25.7",
+    "@vitest/coverage-c8": "^0.25.8",
     "dotenv": "^16.0.3",
     "pug": "^3.0.2",
     "typescript": "^4.9.4",
-    "unocss": "^0.47.5",
-    "vite": "^4.0.0",
-    "vitest": "^0.25.7",
-    "vue-tsc": "^1.0.12"
+    "unocss": "^0.47.6",
+    "vite": "^4.0.1",
+    "vitest": "^0.25.8",
+    "vue-tsc": "^1.0.13"
   },
   "pnpm": {
     "patchedDependencies": {
