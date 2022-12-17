@@ -1,8 +1,8 @@
 import axios from 'axios'
 import FormData from 'form-data'
 
-const DRIVE_CHAT_ID = process.env.TG_CHAT_DRIVE!
-const TESTER_CHATS = (process.env.TG_CHAT_TESTER?.split(',') ?? []).concat(DRIVE_CHAT_ID).map(s => Number(s))
+const DRIVE_CHATS = process.env.TG_CHAT_DRIVE!.split(',')
+const TESTER_CHATS = (process.env.TG_CHAT_TESTER?.split(',') ?? []).map(s => Number(s))
 
 const http = axios.create({
   baseURL: `https://api.telegram.org/bot${process.env.TG_BOT_TOKEN}/`,
@@ -18,11 +18,15 @@ http.interceptors.response.use(
  */
 export async function sendSticker (buffer: Buffer): Promise<string> {
   const form = new FormData()
-  form.append('chat_id', DRIVE_CHAT_ID)
+  form.append('chat_id', DRIVE_CHATS[random(DRIVE_CHATS.length)])
   form.append('sticker', buffer, 'sticker.webp')
 
   const message = await http.postForm<never, TgMessage<'sticker'>>('sendSticker', form)
   return message.sticker.file_id
+}
+
+function random (size: number): number {
+  return Math.floor(Math.random() * size)
 }
 
 export async function answerInlineQuery (queryId: string, resultId: string, fileId: string) {
