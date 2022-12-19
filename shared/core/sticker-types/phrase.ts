@@ -165,7 +165,7 @@ export default class PhraseSticker extends Sticker {
         }
         return rows
       }, [[]]).reverse()
-      const maxRowSize = Math.max(...rows.map(row => row.length))
+      const maxRowSize = Math.max(...rows.map(row => row.length), rows.length)
       rows.forEach(row => {
         row.push(...new Array(maxRowSize - row.length).fill(BLANK))
       })
