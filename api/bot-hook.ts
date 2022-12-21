@@ -6,7 +6,7 @@ import * as telegram from './_utils/telegram'
 import { md5 } from './_utils/hash'
 
 export default <VercelApiHandler>async function (req, res) {
-  const secret = req.headers['X-Telegram-Bot-Api-Secret-Token']
+  const secret = req.headers['x-telegram-bot-api-secret-token']
   if (secret !== process.env.TG_BOT_SECRET) return end()
 
   const updateType = getUpdateType(req.body)
