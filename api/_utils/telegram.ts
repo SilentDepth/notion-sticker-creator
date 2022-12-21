@@ -22,11 +22,11 @@ export async function sendSticker (buffer: Buffer, randomSeed: number): Promise<
   form.append('chat_id', DRIVE_CHATS[randomSeed % DRIVE_CHATS.length])
   form.append('sticker', buffer, 'sticker.webp')
 
-  const message = await http.postForm<never, TgMessage<'sticker'>>('sendSticker', form)
+  const message = await http.postForm<never, Telegram.Message<'sticker'>>('sendSticker', form)
   return message.sticker.file_id
 }
 
-export async function answerInlineQuery (queryId: number, resultId: string, fileId: string) {
+export async function answerInlineQuery (queryId: string, resultId: string, fileId: string) {
   await http.post('answerInlineQuery', {
     inline_query_id: queryId,
     results: [{
@@ -46,18 +46,4 @@ export async function isTester (userId: number): Promise<boolean> {
     } catch {}
   }
   return false
-}
-
-type TgMessage<T> = {
-  message_id: number
-  // We don't need other properties
-  // ...
-} & (
-  T extends 'sticker' ? { sticker: TgSticker } : {}
-  )
-
-interface TgSticker {
-  file_id: string
-  // We don't need other properties
-  // ...
 }
