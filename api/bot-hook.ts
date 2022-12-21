@@ -6,21 +6,27 @@ import * as telegram from './_utils/telegram'
 import { md5 } from './_utils/hash'
 
 export default <VercelApiHandler>async function (req, res) {
+  const secret = req.headers['X-Telegram-Bot-Api-Secret-Token']
+  if (secret !== process.env.TG_BOT_SECRET) return end()
+
   const updateType = getUpdateType(req.body)
   switch (updateType) {
     case 'message':
       await handleMessage(req.body)
-      break
+      return end()
     case 'inline_query':
       await handleInlineQuery(req.body)
-      break
+      return end()
     default:
       console.error(`Unexpected update type (${updateType})`)
       // TODO: Notify me
+      return end()
   }
 
-  res.status(204)
-  res.end()
+  function end () {
+    res.status(204)
+    res.end()
+  }
 }
 
 function getUpdateType (update: object): string {
