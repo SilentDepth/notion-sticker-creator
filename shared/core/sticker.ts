@@ -29,7 +29,8 @@ export default abstract class Sticker {
         async loadAdditionalAsset (code: string, segment: string) {
           if (code === 'emoji') {
             const codePoint = [...segment].map(s => s.codePointAt(0)!).filter(c => c < 0xFE00 || 0xFE0F < c).map(c => c.toString(16).padStart(4, '0')).join('_')
-            const { data: svg } = await axios(`https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${codePoint}.svg`, { responseType: 'text' })
+            const { data: svg } = await axios(`https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${codePoint}.svg`, { responseType: 'text' }).catch(() => ({ data: null }))
+            if (!svg) return
             // For browsers
             if (typeof window !== 'undefined') {
               return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`
