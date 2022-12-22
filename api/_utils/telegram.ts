@@ -2,7 +2,7 @@ import axios from 'axios'
 import FormData from 'form-data'
 
 const DRIVE_CHATS = process.env.TG_CHAT_DRIVE!.split(',')
-const TESTER_CHATS = (process.env.TG_CHAT_TESTER?.split(',') ?? []).map(s => Number(s))
+const TESTER_CHATS = (process.env.TG_CHAT_TESTER?.split(',') ?? []).concat(DRIVE_CHATS).map(s => Number(s))
 
 const http = axios.create({
   baseURL: `https://api.telegram.org/bot${process.env.TG_BOT_TOKEN}/`,
@@ -11,6 +11,14 @@ http.interceptors.response.use(
   res => res.data.result,
   err => Promise.reject(err.response.data),
 )
+
+export async function sendMessage (chatId: number, content: string): Promise<void> {
+  await http.post('sendMessage', {
+    chat_id: chatId,
+    text: content,
+    parse_mode: 'HTML'
+  })
+}
 
 /**
  * @param buffer     - Sticker buffer

@@ -1,13 +1,14 @@
 import type { VercelApiHandler } from '@vercel/node'
 
 import createSticker from '../shared/core'
+import * as messages from './_bot/messages'
 import * as deta from './_utils/deta'
 import * as telegram from './_utils/telegram'
 import { md5 } from './_utils/hash'
 
 export default <VercelApiHandler>async function (req, res) {
   const secret = req.headers['x-telegram-bot-api-secret-token']
-  if (secret !== process.env.TG_BOT_SECRET) return end()
+  if (process.env.NODE_ENV !== 'development' && secret !== process.env.TG_BOT_SECRET) return end()
 
   const updateType = getUpdateType(req.body)
   switch (updateType) {
@@ -42,7 +43,30 @@ function getUpdateType (update: object): string {
   }
 }
 
-async function handleMessage (update: any): Promise<void> {}
+async function handleMessage (update: Telegram.Update<'message'>): Promise<void> {
+  const { message } = update
+  if (message.chat.type !== 'private') return
+
+  if (message.from && isTextMessage(message)) {
+    const { from, text } = message
+    switch (text) {
+      case '/start':
+      case '/help':
+        await telegram.sendMessage(from.id, messages.help())
+        break
+      case '/help_phrase':
+        await telegram.sendMessage(from.id, messages.help_phrase(await telegram.isTester(from.id)))
+        break
+      case '/help_calendar':
+        await telegram.sendMessage(from.id, messages.help_calendar())
+        break
+    }
+  }
+}
+
+function isTextMessage (message: Telegram.Message<any>): message is Telegram.Message<'text'> {
+  return 'text' in message
+}
 
 async function handleInlineQuery (update: Telegram.Update<'inline_query'>): Promise<void> {
   const queryId = update.inline_query.id

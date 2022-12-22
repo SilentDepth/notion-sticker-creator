@@ -12,6 +12,7 @@ namespace Telegram {
   type Message<T extends MessageType> = {
     message_id: number
     from?: User
+    chat: Chat
   } & (
     T extends 'text' ? { text: string, entities?: MessageEntity[] } :
     T extends 'sticker' ? { sticker: Sticker } :
@@ -21,6 +22,11 @@ namespace Telegram {
   type User = {
     id: number
     language_code?: string
+  }
+
+  type Chat = {
+    id: number
+    type: 'private' | 'group' | 'supergroup' | 'channel'
   }
 
   type MessageEntity = {
