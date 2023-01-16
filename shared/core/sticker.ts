@@ -2,12 +2,12 @@ import satori from 'satori'
 import type { FormatEnum } from 'sharp'
 import axios from 'axios'
 
-import type { StickerType } from './sticker-types'
-import { IMAGE_FRAME, FONT_NOTO_SERIF_SC } from './assets'
-import { h, IS_BROWSER } from './utils'
-import type { SatoriNode } from './utils'
+import type { StickerType } from './sticker-types/index.js'
+import { IMAGE_FRAME, FONT_NOTO_SERIF_SC } from './assets.js'
+import { h, IS_BROWSER } from './utils.js'
+import type { SatoriNode } from './utils.js'
 
-const sharp = IS_BROWSER ? null as never : require('sharp')
+const sharp = IS_BROWSER ? null as never : await import('sharp').then(m => m.default)
 
 export default abstract class Sticker {
   protected _key: string | undefined

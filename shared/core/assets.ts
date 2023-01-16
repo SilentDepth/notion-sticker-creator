@@ -1,10 +1,12 @@
 import path from 'node:path'
 import fs from 'node:fs'
+import url from 'node:url'
 import axios from 'axios'
 
-import { isBrowser } from './utils'
+import { isBrowser } from './utils.js'
 
 const IS_BROWSER = isBrowser()
+const __dirname = IS_BROWSER ? '' : path.resolve(url.fileURLToPath(import.meta.url), '..')
 
 export const IMAGE_FRAME = (async () => {
   if (IS_BROWSER) {

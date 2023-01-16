@@ -1,5 +1,5 @@
-import Sticker from '../sticker'
-import { h, IS_BROWSER } from '../utils'
+import Sticker from '../sticker.js'
+import { h, IS_BROWSER } from '../utils.js'
 
 enum LOCALES {
   zh = 'zh',

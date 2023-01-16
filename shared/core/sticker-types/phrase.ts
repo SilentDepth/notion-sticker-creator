@@ -1,5 +1,5 @@
-import Sticker from '../sticker'
-import { h, sanitize, split } from '../utils'
+import Sticker from '../sticker.js'
+import { h, sanitize, split } from '../utils.js'
 
 interface Params {
   text: string

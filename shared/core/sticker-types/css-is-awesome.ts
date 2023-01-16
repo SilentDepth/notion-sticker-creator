@@ -1,5 +1,5 @@
-import Sticker from "../sticker"
-import { h } from "../utils"
+import Sticker from '../sticker.js'
+import { h } from '../utils.js'
 
 export default class CssIsAwesomeSticker extends Sticker {
   constructor () {

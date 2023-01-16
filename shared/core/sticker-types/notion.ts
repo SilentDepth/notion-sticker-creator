@@ -1,6 +1,6 @@
-import Sticker from '../sticker'
-import { h } from '../utils'
-import { IMAGE_NOTION } from '../assets'
+import Sticker from '../sticker.js'
+import { h } from '../utils.js'
+import { IMAGE_NOTION } from '../assets.js'
 
 export default class CssIsAwesomeSticker extends Sticker {
   constructor () {

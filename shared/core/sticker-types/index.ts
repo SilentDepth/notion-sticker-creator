@@ -1,7 +1,7 @@
-import PhraseSticker from './phrase'
-import CalendarSticker from './calendar'
-import CssIsAwesomeSticker from './css-is-awesome'
-import NotionLogoSticker from './notion'
+import PhraseSticker from './phrase.js'
+import CalendarSticker from './calendar.js'
+import CssIsAwesomeSticker from './css-is-awesome.js'
+import NotionLogoSticker from './notion.js'
 
 export {
   PhraseSticker,

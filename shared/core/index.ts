@@ -1,8 +1,8 @@
 import Sticker from './sticker'
-import { CssIsAwesomeSticker, StickerClass, StickerParams, StickerType } from './sticker-types'
-import { PhraseSticker, CalendarSticker, NotionLogoSticker } from './sticker-types'
+import { CssIsAwesomeSticker, PhraseSticker, CalendarSticker, NotionLogoSticker } from './sticker-types/index.js'
+import type { StickerClass, StickerParams, StickerType } from './sticker-types/index.js'
 
-export * from './sticker-types'
+export * from './sticker-types/index.js'
 
 export default function createSticker<T extends StickerType> (type: T, params?: StickerParams<T>): StickerClass<T>
 export default function createSticker (type: StickerType, params?: any): Sticker {

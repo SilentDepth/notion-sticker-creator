@@ -1,12 +1,12 @@
 import type { VercelApiHandler } from '@vercel/node'
 import type { FormatEnum } from 'sharp'
 
-import createSticker from '../../../shared/core'
+import createSticker from '../../../shared/core/index.js'
 
 export default <VercelApiHandler>async function (req, res) {
   const { format, ...params } = resolveQuery(req.query)
 
-  const sticker = createSticker('calendar', { ...params })
+  const sticker = createSticker('calendar', params)
 
   res.setHeader('Content-Type', resolveMIME(format))
   res.send(format === 'svg' ? await sticker : await sticker.render().toBuffer(format))
