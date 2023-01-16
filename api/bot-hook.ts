@@ -1,10 +1,10 @@
 import type { VercelApiHandler } from '@vercel/node'
 
-import createSticker from '../shared/core'
-import * as messages from './_bot/messages'
-import * as deta from './_utils/deta'
-import * as telegram from './_utils/telegram'
-import { md5 } from './_utils/hash'
+import createSticker from '../shared/core/index.js'
+import * as messages from './_bot/messages.js'
+import * as deta from './_utils/deta.js'
+import * as telegram from './_utils/telegram.js'
+import { md5 } from './_utils/hash.js'
 
 export default <VercelApiHandler>async function (req, res) {
   const secret = req.headers['x-telegram-bot-api-secret-token']

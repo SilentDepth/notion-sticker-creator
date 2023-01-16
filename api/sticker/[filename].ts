@@ -1,7 +1,7 @@
 import type { VercelApiHandler } from '@vercel/node'
 import type { FormatEnum } from 'sharp'
 
-import createSticker from '../../shared/core'
+import createSticker from '../../shared/core/index.js'
 
 interface RequestQuery {
   filename: string
