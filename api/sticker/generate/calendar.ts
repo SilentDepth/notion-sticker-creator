@@ -18,6 +18,7 @@ interface RequestQuery {
 
 function resolveQuery (query: Partial<RequestQuery> = {}): RequestQuery {
   return {
+    ...query,
     format: query.format || 'webp',
   }
 }
