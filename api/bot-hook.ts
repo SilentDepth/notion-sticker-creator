@@ -8,7 +8,7 @@ import { md5 } from './_utils/hash.js'
 
 export default <VercelApiHandler>async function (req, res) {
   const secret = req.headers['x-telegram-bot-api-secret-token']
-  if (process.env.NODE_ENV !== 'development' && secret !== process.env.TG_BOT_SECRET) return end()
+    if (process.env.NODE_ENV !== 'development' && secret !== process.env.TG_BOT_SECRET) return end()
 
   const updateType = getUpdateType(req.body)
   switch (updateType) {
@@ -73,7 +73,7 @@ async function handleInlineQuery (update: Telegram.Update<'inline_query'>): Prom
   const queryText = update.inline_query.query
 
   const [$, args] = parseQuery(queryText) ?? []
-  let sticker!: ReturnType<typeof createSticker>
+    let sticker!: ReturnType<typeof createSticker>
   switch ($) {
     case undefined:
     case 'phrase': {
@@ -87,6 +87,9 @@ async function handleInlineQuery (update: Telegram.Update<'inline_query'>): Prom
             break
           case text === 'notion' && Array.prototype.join.call(args, ' ') === 'notion logo':
             sticker = createSticker('notion')
+            break
+          case text === 'notion' && Array.prototype.join.call(args, ' ') === 'notion calendar logo':
+            sticker = createSticker('notion-calendar')
             break
           default:
             sticker = createSticker('phrase', {

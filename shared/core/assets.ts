@@ -28,6 +28,16 @@ export const IMAGE_NOTION = (async () => {
   }
 })()
 
+export const IMAGE_NOTION_CALENDAR = (async () => {
+  if (IS_BROWSER) {
+    const $img = await fetchImage('/assets/notion-calendar-logo.png')
+    return imgToDataURL($img)
+  } else {
+    const encoded = fs.readFileSync(path.resolve(__dirname, '../../public/assets/notion-calendar-logo.png')).toString('base64')
+    return 'data:image/png;base64,' + encoded
+  }
+})()
+
 export const FONT_NOTO_SERIF_SC = (async () => {
   if (IS_BROWSER) {
     const { data } = await axios.get('/assets/NotoSerifSC-Bold.otf', { responseType: 'arraybuffer' })
