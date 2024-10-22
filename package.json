@@ -22,6 +22,7 @@
     "vue": "^3.2.45"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/node": "^18.11.18",
     "@types/sharp": "^0.31.1",
     "@vercel/node": "^2.8.5",
