@@ -10,7 +10,7 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "packageManager": "pnpm@7.17.0",
+  "packageManager": "pnpm@9.12.2",
   "dependencies": {
     "@unocss/reset": "^0.48.3",
     "@vueuse/core": "^9.10.0",

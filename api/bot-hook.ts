@@ -2,7 +2,7 @@ import type { VercelApiHandler } from '@vercel/node'
 
 import createSticker from '../shared/core/index.js'
 import * as messages from './_bot/messages.js'
-import * as deta from './_utils/deta.js'
+import * as cache from './_utils/cache.js'
 import * as telegram from './_utils/telegram.js'
 import { md5 } from './_utils/hash.js'
 
@@ -113,15 +113,15 @@ async function handleInlineQuery (update: Telegram.Update<'inline_query'>): Prom
 
   // Check if the same sticker was created already
   const cacheKey = md5(sticker.key)
-  const cache = await deta.getItem(cacheKey).catch(() => null)
-  if (cache) {
-    await telegram.answerInlineQuery(queryId, cacheKey, cache.sticker_file_id)
+  const cached = await cache.get(cacheKey)
+  if (cached) {
+    await telegram.answerInlineQuery(queryId, cacheKey, cached.sticker_file_id)
   } else {
     const stickerBuffer = await sticker.render().toBuffer('webp')
     const fileId = await telegram.sendSticker(stickerBuffer, Number(queryId))
     await Promise.all([
       telegram.answerInlineQuery(queryId, cacheKey, fileId),
-      deta.putItem({ key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId }).catch(() => {})
+      cache.put(cacheKey, { key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId }).catch(() => {})
     ])
   }
 }
