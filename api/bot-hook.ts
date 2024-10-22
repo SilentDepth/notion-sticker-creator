@@ -34,7 +34,7 @@ function getUpdateType (update: object): string {
   const keys = new Set(Object.keys(update))
   keys.delete('update_id')
   if (keys.size === 1) {
-    return keys.values().next().value
+    return keys.values().next().value!
   }
   // This should never happen
   else {
