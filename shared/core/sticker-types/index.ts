@@ -3,10 +3,12 @@ import CalendarSticker from './calendar.js'
 import CssIsAwesomeSticker from './css-is-awesome.js'
 import NotionLogoSticker from './notion.js'
 import NotionCalendarLogoSticker from './notion-calendar.js'
+import QrcodeSticker from './qrcode.js'
 
 export {
   PhraseSticker,
   CalendarSticker,
+  QrcodeSticker,
   CssIsAwesomeSticker,
   NotionLogoSticker,
   NotionCalendarLogoSticker,
@@ -15,6 +17,7 @@ export {
 export type StickerClassMap = {
   phrase: PhraseSticker
   calendar: CalendarSticker
+  qrcode: QrcodeSticker
   'css-is-awesome': CssIsAwesomeSticker
   notion: NotionLogoSticker
   'notion-calendar': NotionCalendarLogoSticker
@@ -22,6 +25,7 @@ export type StickerClassMap = {
 export type StickerClassCtorMap = {
   phrase: typeof PhraseSticker
   calendar: typeof CalendarSticker
+  qrcode: typeof QrcodeSticker
   'css-is-awesome': typeof CssIsAwesomeSticker
   notion: typeof NotionLogoSticker
   'notion-calendar': typeof NotionCalendarLogoSticker

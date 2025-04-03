@@ -1,5 +1,5 @@
 import Sticker from './sticker'
-import { CssIsAwesomeSticker, PhraseSticker, CalendarSticker, NotionLogoSticker, NotionCalendarLogoSticker } from './sticker-types/index.js'
+import { CssIsAwesomeSticker, PhraseSticker, CalendarSticker, QrcodeSticker, NotionLogoSticker, NotionCalendarLogoSticker } from './sticker-types/index.js'
 import type { StickerClass, StickerParams, StickerType } from './sticker-types/index.js'
 
 export * from './sticker-types/index.js'
@@ -11,6 +11,8 @@ export default function createSticker (type: StickerType, params?: any): Sticker
       return new PhraseSticker(params)
     case 'calendar':
       return new CalendarSticker(params)
+    case 'qrcode':
+      return new QrcodeSticker(params)
     case 'css-is-awesome':
       return new CssIsAwesomeSticker()
     case 'notion':

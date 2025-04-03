@@ -1,10 +1,12 @@
 import type { VercelApiHandler } from '@vercel/node'
-
 import createSticker from '../shared/core/index.js'
 import * as messages from './_bot/messages.js'
 import * as cache from './_utils/cache.js'
 import * as telegram from './_utils/telegram.js'
 import { md5 } from './_utils/hash.js'
+import createProfiler from '../shared/profiler'
+
+const profiler = createProfiler()
 
 export default <VercelApiHandler>async function (req, res) {
   const secret = req.headers['x-telegram-bot-api-secret-token']
@@ -107,6 +109,11 @@ async function handleInlineQuery (update: Telegram.Update<'inline_query'>): Prom
       sticker = createSticker('calendar', { ...params, date })
       break
     }
+    case 'qrcode':
+    case 'qr':
+      const { 0: data } = typeof args === 'object' ? args : {}
+      sticker = createSticker('qrcode', { data })
+      break
     default:
       return
   }
