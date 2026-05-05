@@ -1,0 +1,13 @@
+.DS_Store
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+__unconfig*
+todos.json
+.idea
