@@ -14,10 +14,19 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Notion 贴纸生成器',
       },
     ],
     links: [
+      {
+        rel: 'icon',
+        href: '/favicon.png',
+        type: 'image/png',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-icon-114x114px.png',
+      },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -29,11 +38,11 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="zh">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="antialiased">
         {children}
         <TanStackDevtools
           config={{

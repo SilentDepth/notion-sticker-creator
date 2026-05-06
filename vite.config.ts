@@ -3,14 +3,17 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
+import { unwasm } from 'unwasm/plugin'
 import { defineConfig } from 'vite-plus'
 
-const config = defineConfig({
+const useWasmEsmImport = process.env.NODE_ENV !== 'development'
+
+export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
   fmt: {
-    ignorePatterns: ['routeTree.gen.ts'],
+    ignorePatterns: ['routeTree.gen.ts', '.pnpm-store/**'],
     semi: false,
     singleQuote: true,
     arrowParens: 'avoid',
@@ -39,14 +42,27 @@ const config = defineConfig({
     },
   },
   lint: {
-    ignorePatterns: ['routeTree.gen.ts'],
+    ignorePatterns: ['routeTree.gen.ts', '.pnpm-store/**'],
     options: { typeAware: true, typeCheck: true },
     rules: {
       'no-unused-vars': 'warn',
     },
   },
   resolve: { tsconfigPaths: true },
-  plugins: [devtools(), nitro(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [
+    devtools(),
+    nitro({
+      compatibilityDate: '2026-05-01',
+      preset: 'cloudflare-module',
+      wasm: false,
+    }),
+    unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
+    tailwindcss(),
+    tanstackStart({
+      spa: {
+        enabled: true,
+      },
+    }),
+    viteReact(),
+  ],
 })
-
-export default config

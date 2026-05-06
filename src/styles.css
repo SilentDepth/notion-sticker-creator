@@ -1,15 +1,27 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/NotoSerifSC-Bold.otf') format('opentype');
+}
+
 * {
   box-sizing: border-box;
 }
 
 html,
-body,
-#app {
+body {
   min-height: 100%;
 }
 
 body {
   margin: 0;
+  background: var(--color-neutral-950);
+}
+
+.font-serif {
+  font-family: 'Noto Serif SC', serif;
 }
