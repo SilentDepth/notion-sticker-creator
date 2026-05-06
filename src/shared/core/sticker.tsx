@@ -97,8 +97,15 @@ class StickerRenderResult extends Promise<string> {
       throw new Error('Buffering sticker is not supported on browsers')
     }
 
-    const svgBuffer = Buffer.from(await this, 'utf-8')
+    const svg = await this
+    const svgBuf = new TextEncoder().encode(svg)
+    if (format === SupportedFormat.svg) return svgBuf
+
     const { default: Resvg } = await import('@/libs/resvg')
-    return format === 'svg' ? svgBuffer : new Resvg(await this).render().asPng()
+    const rendered = new Resvg(svg).render()
+    if (format === SupportedFormat.png) return rendered.asPng()
+
+    const { default: webp } = await import('@/utils/webp')
+    return (await webp()).encode(rendered.pixels, rendered.width, rendered.height, { lossless: 1 })
   }
 }

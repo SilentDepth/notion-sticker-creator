@@ -57,33 +57,31 @@ export default class PhraseSticker extends Sticker {
     const rowSize = Math.ceil(Math.sqrt(this.graphemes.length))
     const fontSize = 316 / (rowSize + 0.5)
     return Sticker.frame(
-      <>
-        {Array.from({ length: rowSize }, (_, rowIdx) => (
-          <div key={rowIdx} style={{ display: 'flex' }}>
-            {Array.from({ length: rowSize }, (_, colIdx) => {
-              const graphemeIdx = rowIdx * rowSize + colIdx
-              return (
-                <div
-                  key={colIdx}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    width: '1em',
-                    height: '1em',
-                    fontSize: `${fontSize}px`,
-                    color: this.graphemes[graphemeIdx].color,
-                    ...(debug ? { boxShadow: '0 0 0 1px #f0f' } : {}),
-                  }}
-                >
-                  <span style={{ height: '100%', transform: 'translateY(-7.1429%)' }}>
-                    {this.graphemes[graphemeIdx].value}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        ))}
-      </>,
+      Array.from({ length: rowSize }, (_, rowIdx) => (
+        <div key={rowIdx} style={{ display: 'flex' }}>
+          {Array.from({ length: rowSize }, (_, colIdx) => {
+            const graphemeIdx = rowIdx * rowSize + colIdx
+            return (
+              <div
+                key={colIdx}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  width: '1em',
+                  height: '1em',
+                  fontSize,
+                  color: this.graphemes[graphemeIdx].color,
+                  ...(debug ? { boxShadow: '0 0 0 1px #f0f' } : {}),
+                }}
+              >
+                <span style={{ height: '100%', transform: 'translateY(-7.1429%)' }}>
+                  {this.graphemes[graphemeIdx].value}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )),
       debug,
     )
   }
