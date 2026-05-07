@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { uint8ArrayToBase64 } from 'uint8array-extras'
-import satori from '@/libs/satori'
 import { FONT_NOTO_SERIF_SC, IMAGE_FRAME } from '@/shared/core/assets'
 import type { StickerType } from '@/shared/core/sticker-types'
 import { SupportedFormat } from '@/shared/core/utils'
@@ -16,6 +15,7 @@ export default abstract class Sticker {
 
   render(debug?: boolean): StickerRenderResult {
     return new StickerRenderResult(async resolve => {
+      const { default: satori } = await import('@/libs/satori')
       const node = (await this.renderNode(debug)) as Parameters<typeof satori>[0]
       const svg = await satori(node, {
         width: 512,

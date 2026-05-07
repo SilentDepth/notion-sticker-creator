@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vp dev",
     "build": "vp build",
+    "test": "vp test",
     "preview": "vp preview",
     "prepare": "vp config"
   },

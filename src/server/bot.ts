@@ -1,13 +1,13 @@
 import * as cache from './cache'
 import { md5 } from './hash'
 import { help, helpCalendar, helpPhrase } from './messages'
+import { parseQuery } from './query'
 import * as telegram from './telegram'
 import type { Telegram } from './telegram-types'
 import createSticker from '@/shared/core'
 import { SupportedFormat } from '@/shared/core/utils'
 
-type QueryArgs = Record<string, string>
-type ParsedQuery = [type: string | undefined, args: QueryArgs]
+export { parseQuery } from './query'
 
 export async function handleBotHook(request: Request): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token')
@@ -28,36 +28,6 @@ export async function handleBotHook(request: Request): Promise<Response> {
     default:
       return empty()
   }
-}
-
-export function parseQuery(text: string): ParsedQuery | null {
-  if (!text) return null
-
-  const typeRe = /^\$(\w+)(?:\s+|$)/y
-  const [, type] = typeRe.exec(text) ?? []
-  const input = text.slice(typeRe.lastIndex)
-
-  if (input.startsWith('#')) {
-    return input.length > 2 && /\$r?$/.test(input) ? [type, { 0: input }] : null
-  }
-
-  const segments = input.split(/((?<!\\)\s)+/).filter(segment => !/^\s*$/.test(segment))
-
-  const args: QueryArgs = {}
-  const positional: string[] = []
-
-  for (const segment of segments) {
-    const { name, value } = /^(?:(?<name>\w+)=)?(?<value>.+)$/.exec(segment)?.groups ?? {}
-
-    if (name) {
-      args[name] = value
-    } else if (value) {
-      positional.push(value)
-    }
-  }
-
-  Object.assign(args, positional)
-  return [type, args]
 }
 
 function getUpdateType(update: Telegram.Update): Telegram.UpdateType {

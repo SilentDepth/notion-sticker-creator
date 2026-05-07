@@ -8,6 +8,7 @@ import { unwasm } from 'unwasm/plugin'
 import { defineConfig } from 'vite-plus'
 
 const useWasmEsmImport = process.env.NODE_ENV !== 'development'
+const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
 
 export default defineConfig({
   staged: {
@@ -51,12 +52,16 @@ export default defineConfig({
   },
   resolve: { tsconfigPaths: true },
   plugins: [
-    devtools(),
-    nitro({
-      compatibilityDate: '2026-05-01',
-      preset: 'cloudflare-module',
-      wasm: false,
-    }),
+    ...(isTest
+      ? []
+      : [
+          devtools(),
+          nitro({
+            compatibilityDate: '2026-05-01',
+            preset: 'cloudflare-module',
+            wasm: false,
+          }),
+        ]),
     unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
     icons({
       compiler: 'jsx',
@@ -64,11 +69,15 @@ export default defineConfig({
       autoInstall: true,
     }),
     tailwindcss(),
-    tanstackStart({
-      spa: {
-        enabled: true,
-      },
-    }),
+    ...(isTest
+      ? []
+      : [
+          tanstackStart({
+            spa: {
+              enabled: true,
+            },
+          }),
+        ]),
     viteReact(),
   ],
 })
