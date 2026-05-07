@@ -1,16 +1,14 @@
 import { useIntersection } from '@mantine/hooks'
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  Check,
-  ClipboardCopy,
-  Download,
-  Github,
-  ImageDown,
-  Palette,
-  Send,
-  Type,
-} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import MingcuteCheckLine from '~icons/mingcute/check-line'
+import MingcuteCopy2Line from '~icons/mingcute/copy-2-line'
+import MingcuteDownload2Line from '~icons/mingcute/download-2-line'
+import MingcuteFileDownloadLine from '~icons/mingcute/file-download-line'
+import MingcuteGithubLine from '~icons/mingcute/github-line'
+import MingcutePaletteLine from '~icons/mingcute/palette-line'
+import MingcuteTelegramLine from '~icons/mingcute/telegram-line'
+import MingcuteText2Line from '~icons/mingcute/text-2-line'
 import { AsyncButton } from '@/components/async-button'
 import { ColorInput } from '@/components/color-input'
 import { NotionSticker, type NotionStickerHandle } from '@/components/notion-sticker'
@@ -138,7 +136,7 @@ function Home() {
         <section className="mt-8 grid w-full max-w-3xl gap-8">
           <div className="grid gap-3">
             <div className="flex items-center gap-2 text-base text-neutral-200 sm:text-sm">
-              <Type className="size-4 shrink-0 stroke-neutral-400" />
+              <MingcuteText2Line className="size-4 shrink-0 text-neutral-400" />
               <h2 className="font-medium">文字</h2>
               <span className="ml-auto tabular-nums text-neutral-500">
                 {graphemes.length}/{MAX}
@@ -157,7 +155,7 @@ function Home() {
 
           <div className="grid justify-items-center gap-4">
             <div className="flex w-full items-center gap-2 text-base text-neutral-200 sm:text-sm">
-              <Palette className="size-4 shrink-0 stroke-neutral-400" />
+              <MingcutePaletteLine className="size-4 shrink-0 text-neutral-400" />
               <h2 className="font-medium">颜色</h2>
               <label className="ml-auto flex items-center gap-2 text-base text-neutral-300 sm:text-sm">
                 <span>逐字设定</span>
@@ -199,7 +197,7 @@ function Home() {
 
           <div className="grid gap-3">
             <div className="flex items-center gap-2 text-base text-neutral-200 sm:text-sm">
-              <ImageDown className="size-4 shrink-0 stroke-neutral-400" />
+              <MingcuteFileDownloadLine className="size-4 shrink-0 text-neutral-400" />
               <h2 className="font-medium">导出</h2>
             </div>
 
@@ -210,7 +208,7 @@ function Home() {
                 type="button"
                 onClick={() => downloadSticker('webp')}
               >
-                <Download className="size-4 shrink-0 stroke-white" />
+                <MingcuteDownload2Line className="size-4 shrink-0" />
                 下载 WebP
               </button>
               <button
@@ -219,18 +217,18 @@ function Home() {
                 type="button"
                 onClick={() => downloadSticker('png')}
               >
-                <Download className="size-4 shrink-0 stroke-white" />
+                <MingcuteDownload2Line className="size-4 shrink-0" />
                 下载 PNG
               </button>
               <AsyncButton
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-white/8 py-2 pr-3 pl-2 text-base font-medium text-white ring-1 ring-white/10 outline-none hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:text-sm"
                 disabled={!text}
-                doneIcon={<Check className="size-4 stroke-emerald-300" />}
+                doneIcon={<MingcuteCheckLine className="size-4 text-emerald-300" />}
                 onClick={copyStickerPng}
               >
                 {() => (
                   <>
-                    <ClipboardCopy className="size-4 shrink-0 stroke-white" />
+                    <MingcuteCopy2Line className="size-4 shrink-0" />
                     复制 PNG
                   </>
                 )}
@@ -240,12 +238,12 @@ function Home() {
             <AsyncButton
               className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-white/8 py-2 pr-3 pl-2 text-base font-medium text-white ring-1 ring-white/10 outline-none hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:text-sm"
               disabled={!text}
-              doneIcon={<Check className="size-4 stroke-emerald-300" />}
+              doneIcon={<MingcuteCheckLine className="size-4 text-emerald-300" />}
               onClick={copyCommand}
             >
               {() => (
                 <>
-                  <Send className="size-4 shrink-0 stroke-white" />
+                  <MingcuteTelegramLine className="size-4 shrink-0" />
                   复制 Bot 命令
                 </>
               )}
@@ -261,7 +259,7 @@ function Home() {
             target="_blank"
           >
             <span className="sr-only">GitHub</span>
-            <Github className="size-5 stroke-current" />
+            <MingcuteGithubLine className="size-5" />
           </a>
         </footer>
       </div>

@@ -3,6 +3,7 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
+import icons from 'unplugin-icons/vite'
 import { unwasm } from 'unwasm/plugin'
 import { defineConfig } from 'vite-plus'
 
@@ -57,6 +58,11 @@ export default defineConfig({
       wasm: false,
     }),
     unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
+    icons({
+      compiler: 'jsx',
+      jsx: 'react',
+      autoInstall: true,
+    }),
     tailwindcss(),
     tanstackStart({
       spa: {
