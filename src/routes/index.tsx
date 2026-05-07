@@ -227,10 +227,10 @@ function Home() {
                 onClick={copyStickerPng}
               >
                 {() => (
-                  <>
+                  <span className="inline-flex items-center gap-2">
                     <MingcuteCopy2Line className="size-4 shrink-0" />
                     复制 PNG
-                  </>
+                  </span>
                 )}
               </AsyncButton>
             </div>
@@ -242,10 +242,10 @@ function Home() {
               onClick={copyCommand}
             >
               {() => (
-                <>
+                <span className="inline-flex items-center gap-2">
                   <MingcuteTelegramLine className="size-4 shrink-0" />
                   复制 Bot 命令
-                </>
+                </span>
               )}
             </AsyncButton>
           </div>
