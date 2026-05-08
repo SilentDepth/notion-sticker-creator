@@ -1554,10 +1554,19 @@ function createWebPModule(options = {}) {
         return options.instantiateWasm(imports, receiveInstance)
       }
 
-      const result = WebAssembly.instantiate(wasmModule, imports)
+      const instantiate = module => WebAssembly.instantiate(module, imports)
       const onInstance = result => {
         receiveInstance(result.instance || result)
       }
+
+      if (typeof wasmModule.then === 'function') {
+        wasmModule.then(instantiate).then(onInstance, error => {
+          throw error
+        })
+        return {}
+      }
+
+      const result = instantiate(wasmModule)
 
       if (typeof result.then === 'function') {
         result.then(onInstance, error => {
