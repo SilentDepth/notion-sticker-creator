@@ -60,6 +60,11 @@ export default defineConfig({
             compatibilityDate: '2026-05-01',
             preset: 'cloudflare-module',
             wasm: false,
+            cloudflare: {
+              wrangler: {
+                keep_vars: true,
+              },
+            },
           }),
         ]),
     unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
