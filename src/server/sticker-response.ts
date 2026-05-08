@@ -1,7 +1,17 @@
+import { withAssetBaseUrl } from '@/shared/core/assets'
 import type Sticker from '@/shared/core/sticker'
 import { SupportedFormat } from '@/shared/core/utils'
 
 export async function stickerResponse(
+  sticker: Sticker,
+  format: string | null | undefined,
+  requestUrl?: string,
+): Promise<Response> {
+  const createResponse = () => createStickerResponse(sticker, format)
+  return requestUrl ? withAssetBaseUrl(requestUrl, createResponse) : createResponse()
+}
+
+async function createStickerResponse(
   sticker: Sticker,
   format: string | null | undefined,
 ): Promise<Response> {

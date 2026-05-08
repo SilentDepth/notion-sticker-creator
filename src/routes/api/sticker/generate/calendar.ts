@@ -10,7 +10,7 @@ export const Route = createFileRoute('/api/sticker/generate/calendar')({
         const { format, ...params } = Object.fromEntries(url.searchParams)
         const sticker = createSticker('calendar', params)
 
-        return stickerResponse(sticker, format)
+        return stickerResponse(sticker, format, request.url)
       },
     },
   },

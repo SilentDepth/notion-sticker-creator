@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { uint8ArrayToBase64 } from 'uint8array-extras'
-import { FONT_NOTO_SERIF_SC, IMAGE_FRAME } from '@/shared/core/assets'
+import { IMAGE_FRAME, loadNotoSerifScFont } from '@/shared/core/assets'
 import type { StickerType } from '@/shared/core/sticker-types'
 import { SupportedFormat } from '@/shared/core/utils'
 
@@ -21,7 +21,12 @@ export default abstract class Sticker {
         width: 512,
         height: 512,
         fonts: [
-          { name: 'Noto Serif SC', weight: 400, style: 'normal', data: await FONT_NOTO_SERIF_SC },
+          {
+            name: 'Noto Serif SC',
+            weight: 400,
+            style: 'normal',
+            data: await loadNotoSerifScFont(),
+          },
         ],
         async loadAdditionalAsset(code: string, segment: string): Promise<string> {
           if (code === 'emoji') {
@@ -106,6 +111,67 @@ class StickerRenderResult extends Promise<string> {
     if (format === SupportedFormat.png) return rendered.asPng()
 
     const { default: webp } = await import('@/utils/webp')
-    return (await webp()).encode(rendered.pixels, rendered.width, rendered.height, { lossless: 1 })
+    return (await webp()).encode(
+      bleedAlpha(rendered.pixels, rendered.width, rendered.height),
+      rendered.width,
+      rendered.height,
+      {
+        lossless: 1,
+        exact: 1,
+        alpha_quality: 100,
+        near_lossless: 100,
+      },
+    )
   }
+}
+
+function bleedAlpha(rgba: Uint8Array, width: number, height: number, iterations = 4) {
+  const out = new Uint8Array(rgba)
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const prev = new Uint8Array(out)
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4
+        const a = prev[i + 3]
+
+        if (a >= 255) continue
+
+        let r = 0,
+          g = 0,
+          b = 0,
+          count = 0
+
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ]) {
+          const nx = x + dx
+          const ny = y + dy
+          if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue
+
+          const ni = (ny * width + nx) * 4
+          const na = prev[ni + 3]
+
+          if (na > a) {
+            r += prev[ni]
+            g += prev[ni + 1]
+            b += prev[ni + 2]
+            count++
+          }
+        }
+
+        if (count > 0) {
+          out[i] = Math.round(r / count)
+          out[i + 1] = Math.round(g / count)
+          out[i + 2] = Math.round(b / count)
+        }
+      }
+    }
+  }
+
+  return out
 }

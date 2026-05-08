@@ -1,10 +1,11 @@
 import * as cache from './cache'
 import { md5 } from './hash'
 import { help, helpCalendar, helpPhrase } from './messages'
-import { parseQuery } from './query'
+import { parseQuery, type QueryArgs } from './query'
 import * as telegram from './telegram'
 import type { Telegram } from './telegram-types'
 import createSticker from '@/shared/core'
+import { withAssetBaseUrl } from '@/shared/core/assets'
 import { SupportedFormat } from '@/shared/core/utils'
 
 export { parseQuery } from './query'
@@ -23,7 +24,7 @@ export async function handleBotHook(request: Request): Promise<Response> {
       await handleMessage(update as Telegram.Update<'message'>)
       return empty()
     case 'inline_query':
-      await handleInlineQuery(update as Telegram.Update<'inline_query'>)
+      await handleInlineQuery(update as Telegram.Update<'inline_query'>, request.url)
       return empty()
     default:
       return empty()
@@ -67,7 +68,10 @@ function isTextMessage(message: Telegram.Message): message is Telegram.Message<'
   return 'text' in message
 }
 
-async function handleInlineQuery(update: Telegram.Update<'inline_query'>): Promise<void> {
+async function handleInlineQuery(
+  update: Telegram.Update<'inline_query'>,
+  requestUrl: string,
+): Promise<void> {
   const queryId = update.inline_query.id
   const parsedQuery = parseQuery(update.inline_query.query)
   if (!parsedQuery) return
@@ -80,15 +84,16 @@ async function handleInlineQuery(update: Telegram.Update<'inline_query'>): Promi
     case 'phrase': {
       const { 0: text, ...params } = args
       if (!text) return
+      const fullText = getPositionalArgs(args).join(' ')
 
       switch (true) {
-        case text === 'css' && Object.values(args).join(' ') === 'css is awesome':
+        case text === 'css' && fullText === 'css is awesome':
           sticker = createSticker('css-is-awesome')
           break
-        case text === 'notion' && Object.values(args).join(' ') === 'notion logo':
+        case text === 'notion' && fullText === 'notion logo':
           sticker = createSticker('notion')
           break
-        case text === 'notion' && Object.values(args).join(' ') === 'notion calendar logo':
+        case text === 'notion' && fullText === 'notion calendar logo':
           sticker = createSticker('notion-calendar')
           break
         default:
@@ -125,11 +130,15 @@ async function handleInlineQuery(update: Telegram.Update<'inline_query'>): Promi
   const cached = await cache.get(cacheKey)
 
   if (cached) {
-    await telegram.answerInlineQuery(queryId, cacheKey, cached.sticker_file_id)
-    return
+    try {
+      await telegram.answerInlineQuery(queryId, cacheKey, cached.sticker_file_id)
+      return
+    } catch {}
   }
 
-  const stickerBuffer = await sticker.render().toBuffer(SupportedFormat.webp)
+  const stickerBuffer = await withAssetBaseUrl(requestUrl, () =>
+    sticker.render().toBuffer(SupportedFormat.webp),
+  )
   const fileId = await telegram.sendSticker(stickerBuffer, Number(queryId))
   await Promise.all([
     telegram.answerInlineQuery(queryId, cacheKey, fileId),
@@ -137,6 +146,16 @@ async function handleInlineQuery(update: Telegram.Update<'inline_query'>): Promi
       .put(cacheKey, { key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId })
       .catch(() => undefined),
   ])
+}
+
+function getPositionalArgs(args: QueryArgs): string[] {
+  const values: string[] = []
+
+  for (let idx = 0; String(idx) in args; idx++) {
+    values.push(args[String(idx)])
+  }
+
+  return values
 }
 
 function empty(): Response {

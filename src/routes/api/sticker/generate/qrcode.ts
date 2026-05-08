@@ -11,7 +11,7 @@ export const Route = createFileRoute('/api/sticker/generate/qrcode')({
         if (!data) return new Response(null, { status: 204 })
 
         const sticker = createSticker('qrcode', { data })
-        return stickerResponse(sticker, format)
+        return stickerResponse(sticker, format, request.url)
       },
     },
   },

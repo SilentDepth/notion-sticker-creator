@@ -14,7 +14,7 @@ export default class CssIsAwesomeSticker extends Sticker {
     return (
       <div style={{ display: 'flex', width: '100%', height: '100%' }}>
         <img
-          src={await IMAGE_NOTION_CALENDAR}
+          src={IMAGE_NOTION_CALENDAR}
           width="100%"
           height="100%"
           style={{ position: 'absolute', top: 0, left: 0 }}

@@ -1,5 +1,6 @@
-import { expect, test } from 'vite-plus/test'
+import { expect, test, vi } from 'vite-plus/test'
 import { parseQuery } from '@/server/query'
+import CalendarSticker from '@/shared/core/sticker-types/calendar'
 import { createPhraseGraphemes, createPhraseKey } from '@/shared/core/sticker-types/phrase-data'
 
 function phraseKey(params: Parameters<typeof createPhraseGraphemes>[0]): string {
@@ -89,4 +90,30 @@ test('phrase sticker key', () => {
   )
 
   expect(phraseKey({ text: '' })).toBe(JSON.stringify({ type: 'phrase', text: '', color: '' }))
+})
+
+test('calendar sticker defaults to the requested timezone', () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2024-01-01T16:30:00.000Z'))
+
+  try {
+    expect(new CalendarSticker().key).toBe(
+      JSON.stringify({
+        type: 'calendar',
+        date: '2024-01-02',
+        color: 'crimson',
+        locale: 'zh',
+      }),
+    )
+    expect(new CalendarSticker({ color: 'week', timezone: 'America/Los_Angeles' }).key).toBe(
+      JSON.stringify({
+        type: 'calendar',
+        date: '2024-01-01',
+        color: 'tomato',
+        locale: 'zh',
+      }),
+    )
+  } finally {
+    vi.useRealTimers()
+  }
 })

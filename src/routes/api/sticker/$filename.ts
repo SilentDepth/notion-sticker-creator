@@ -15,7 +15,7 @@ export const Route = createFileRoute('/api/sticker/$filename')({
           text,
         })
 
-        return stickerResponse(sticker, format)
+        return stickerResponse(sticker, format, request.url)
       },
     },
   },

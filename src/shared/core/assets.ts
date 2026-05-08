@@ -1,61 +1,47 @@
+import IMAGE_NOTION_CALENDAR from '@/assets/images/notion-calendar-logo.png?inline'
 import IMAGE_FRAME from '@/assets/images/notion-logo-frame.png?inline'
 import IMAGE_NOTION from '@/assets/images/notion-logo.png?inline'
 
-export { IMAGE_FRAME, IMAGE_NOTION }
+export { IMAGE_FRAME, IMAGE_NOTION, IMAGE_NOTION_CALENDAR }
 
-export const IMAGE_NOTION_CALENDAR = (async () => {
-  if (!import.meta.env.SSR) {
-    const $img = await fetchImage('/assets/notion-calendar-logo.png')
-    return imgToDataURL($img)
+const FONT_PATH = '/assets/NotoSerifSC-Bold.otf'
+let assetBaseUrl: string | undefined
+let fontPromise: Promise<ArrayBuffer> | undefined
+
+export async function withAssetBaseUrl<T>(
+  requestUrl: string,
+  callback: () => Promise<T>,
+): Promise<T> {
+  const previousAssetBaseUrl = assetBaseUrl
+  assetBaseUrl = new URL(requestUrl).origin
+
+  try {
+    return await callback()
+  } finally {
+    assetBaseUrl = previousAssetBaseUrl
   }
+}
 
-  const encoded = readPublicAssetBase64('notion-calendar-logo.png')
-  return 'data:image/png;base64,' + encoded
-})()
-
-export const FONT_NOTO_SERIF_SC = (async () => {
-  if (!import.meta.env.SSR) {
-    const response = await fetch('/assets/NotoSerifSC-Bold.otf')
+export async function loadNotoSerifScFont(): Promise<ArrayBuffer> {
+  fontPromise ??= fetch(assetUrl(FONT_PATH)).then(response => {
     if (!response.ok) {
       throw new Error(`Failed to load font: ${response.status}`)
     }
+
     return response.arrayBuffer()
-  }
+  })
 
-  const { fs, path } = getNodeBuiltins()
-  return fs.readFileSync(path.resolve(process.cwd(), 'public/assets/NotoSerifSC-Bold.otf'))
-})()
-
-function readPublicAssetBase64(filename: string): string {
-  const { fs, path } = getNodeBuiltins()
-  return fs.readFileSync(path.resolve(process.cwd(), 'public/assets', filename)).toString('base64')
+  return fontPromise
 }
 
-function getNodeBuiltins(): {
-  fs: typeof import('node:fs')
-  path: typeof import('node:path')
-} {
-  if (!process.getBuiltinModule) {
-    throw new Error('Node.js built-in module loader is not available')
+function assetUrl(path: string): string {
+  if (!import.meta.env.SSR) {
+    return path
   }
 
-  return {
-    fs: process.getBuiltinModule('node:fs') as typeof import('node:fs'),
-    path: process.getBuiltinModule('node:path') as typeof import('node:path'),
+  if (!assetBaseUrl) {
+    throw new Error('Asset base URL is not set for server-side sticker rendering')
   }
-}
 
-async function fetchImage(src: string): Promise<HTMLImageElement> {
-  const $img = new Image()
-  $img.src = src
-  return new Promise(resolve => ($img.onload = () => resolve($img)))
-}
-
-function imgToDataURL($img: HTMLImageElement): string {
-  const $canvas = document.createElement('canvas')
-  $canvas.width = $img.naturalWidth
-  $canvas.height = $img.naturalHeight
-  const ctx = $canvas.getContext('2d')!
-  ctx.drawImage($img, 0, 0)
-  return $canvas.toDataURL()
+  return new URL(path, assetBaseUrl).href
 }

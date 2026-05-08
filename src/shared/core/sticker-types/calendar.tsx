@@ -13,20 +13,28 @@ interface Params {
   locale?: string
 }
 
+interface DateParts {
+  year: number
+  month: number
+  day: number
+  weekday: number
+}
+
 export default class CalendarSticker extends Sticker {
   readonly date: Date
+  readonly dateParts: DateParts
   readonly color: string
   readonly locale: LOCALES
 
   constructor(params: Params = {}) {
     super('calendar')
 
-    if (!IS_BROWSER && typeof process !== 'undefined' && !params.date) {
-      process.env.TZ = params.timezone || 'Asia/Shanghai'
-    }
-    this.date = params.date ? new Date(params.date) : new Date()
+    this.dateParts = resolveDateParts(params.date, params.timezone)
+    this.date = new Date(
+      Date.UTC(this.dateParts.year, this.dateParts.month - 1, this.dateParts.day),
+    )
     this.color =
-      params.color === 'week' ? weekdayColor(this.date.getDay()) : params.color || 'crimson'
+      params.color === 'week' ? weekdayColor(this.dateParts.weekday) : params.color || 'crimson'
     this.locale = isLocale(params.locale) ? params.locale : LOCALES.zh
   }
 
@@ -34,9 +42,9 @@ export default class CalendarSticker extends Sticker {
     this._key ??= JSON.stringify({
       type: this.type,
       date: [
-        this.date.getFullYear(),
-        String(this.date.getMonth() + 1).padStart(2, '0'),
-        String(this.date.getDate()).padStart(2, '0'),
+        this.dateParts.year,
+        String(this.dateParts.month).padStart(2, '0'),
+        String(this.dateParts.day).padStart(2, '0'),
       ].join('-'),
       // TODO: normalize color
       color: this.color,
@@ -49,7 +57,7 @@ export default class CalendarSticker extends Sticker {
     return Sticker.frame(
       <>
         <span style={{ fontSize: '50px', height: '1em', transform: 'translateY(-7.1429%)' }}>
-          {`${this.date.getFullYear()} · ${this.date.getMonth() + 1}`}
+          {`${this.dateParts.year} · ${this.dateParts.month}`}
         </span>
         <span
           style={{
@@ -61,10 +69,10 @@ export default class CalendarSticker extends Sticker {
             ...(debug ? { boxShadow: '0 0 0 1px #f0f' } : {}),
           }}
         >
-          {String(this.date.getDate())}
+          {String(this.dateParts.day)}
         </span>
         <span style={{ fontSize: '50px', height: '1em', transform: 'translateY(-7.1429%)' }}>
-          {weekday(this.date.getDay(), this.locale)}
+          {weekday(this.dateParts.weekday, this.locale)}
         </span>
       </>,
       debug,
@@ -74,6 +82,58 @@ export default class CalendarSticker extends Sticker {
 
 function isLocale(locale: string | undefined): locale is LOCALES {
   return Boolean(locale && locale in LOCALES)
+}
+
+function resolveDateParts(date: string | Date | undefined, timezone = 'Asia/Shanghai'): DateParts {
+  if (date) {
+    return parseDateParts(date)
+  }
+
+  if (IS_BROWSER) {
+    return parseDateParts(new Date())
+  }
+
+  return getDatePartsInTimeZone(new Date(), timezone)
+}
+
+function parseDateParts(date: string | Date): DateParts {
+  if (typeof date === 'string') {
+    const match = /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$/.exec(date)
+
+    if (match?.groups) {
+      const year = Number(match.groups.year)
+      const month = Number(match.groups.month)
+      const day = Number(match.groups.day)
+      return { year, month, day, weekday: getUtcWeekday(year, month, day) }
+    }
+  }
+
+  const value = new Date(date)
+  return {
+    year: value.getFullYear(),
+    month: value.getMonth() + 1,
+    day: value.getDate(),
+    weekday: value.getDay(),
+  }
+}
+
+function getDatePartsInTimeZone(date: Date, timezone: string): DateParts {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: timezone,
+    year: 'numeric',
+  }).formatToParts(date)
+  const partMap = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  const year = Number(partMap.year)
+  const month = Number(partMap.month)
+  const day = Number(partMap.day)
+
+  return { year, month, day, weekday: getUtcWeekday(year, month, day) }
+}
+
+function getUtcWeekday(year: number, month: number, day: number): number {
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
 }
 
 function weekday(day: number, locale: string): string {
