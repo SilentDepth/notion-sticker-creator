@@ -56,9 +56,17 @@ export default defineConfig({
       ? []
       : [
           devtools(),
+          tanstackStart({
+            spa: {
+              enabled: false,
+            },
+            prerender: {
+              enabled: false,
+            },
+          }),
           nitro({
             compatibilityDate: '2026-05-01',
-            preset: 'cloudflare-module',
+            preset: 'cloudflare_module',
             wasm: false,
             cloudflare: {
               wrangler: {
@@ -68,21 +76,12 @@ export default defineConfig({
           }),
         ]),
     unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
+    viteReact(),
     icons({
       compiler: 'jsx',
       jsx: 'react',
       autoInstall: true,
     }),
     tailwindcss(),
-    ...(isTest
-      ? []
-      : [
-          tanstackStart({
-            spa: {
-              enabled: true,
-            },
-          }),
-        ]),
-    viteReact(),
   ],
 })
