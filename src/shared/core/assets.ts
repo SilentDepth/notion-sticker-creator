@@ -8,6 +8,16 @@ const FONT_PATH = '/assets/NotoSerifSC-Bold.otf'
 let assetBaseUrl: string | undefined
 let fontPromise: Promise<ArrayBuffer> | undefined
 
+interface CloudflareAssetsBinding {
+  fetch(request: Request): Promise<Response>
+}
+
+interface CloudflareRuntime {
+  __env__?: {
+    ASSETS?: CloudflareAssetsBinding
+  }
+}
+
 export async function withAssetBaseUrl<T>(
   requestUrl: string,
   callback: () => Promise<T>,
@@ -23,7 +33,7 @@ export async function withAssetBaseUrl<T>(
 }
 
 export async function loadNotoSerifScFont(): Promise<ArrayBuffer> {
-  fontPromise ??= fetch(assetUrl(FONT_PATH)).then(response => {
+  fontPromise ??= fetchAsset(FONT_PATH).then(response => {
     if (!response.ok) {
       throw new Error(`Failed to load font: ${response.status}`)
     }
@@ -32,6 +42,15 @@ export async function loadNotoSerifScFont(): Promise<ArrayBuffer> {
   })
 
   return fontPromise
+}
+
+function fetchAsset(path: string): Promise<Response> {
+  const assets = (globalThis as typeof globalThis & CloudflareRuntime).__env__?.ASSETS
+  if (import.meta.env.SSR && assets) {
+    return assets.fetch(new Request(new URL(path, 'https://assets.local')))
+  }
+
+  return fetch(assetUrl(path))
 }
 
 function assetUrl(path: string): string {
