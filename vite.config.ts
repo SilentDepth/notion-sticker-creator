@@ -71,6 +71,9 @@ export default defineConfig({
             cloudflare: {
               wrangler: {
                 keep_vars: true,
+                observability: {
+                  enabled: true,
+                },
               },
             },
           }),
