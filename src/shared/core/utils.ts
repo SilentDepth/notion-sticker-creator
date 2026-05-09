@@ -21,14 +21,6 @@ export function sanitize(input: string): string {
     .join('')
 }
 
-export function encodeBase64url(text: string): string {
-  if (IS_BROWSER) {
-    return text
-  } else {
-    return Buffer.from(text).toString('base64url')
-  }
-}
-
 export function split(text: string): string[] {
   if (typeof Intl.Segmenter !== 'function') {
     return Array.from(text)

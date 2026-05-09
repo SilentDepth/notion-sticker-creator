@@ -15,7 +15,7 @@ export default defineConfig({
     '*': 'vp check --fix',
   },
   fmt: {
-    ignorePatterns: ['routeTree.gen.ts', '.pnpm-store/**'],
+    ignorePatterns: ['routeTree.gen.ts'],
     semi: false,
     singleQuote: true,
     arrowParens: 'avoid',
@@ -44,7 +44,7 @@ export default defineConfig({
     },
   },
   lint: {
-    ignorePatterns: ['routeTree.gen.ts', '.pnpm-store/**'],
+    ignorePatterns: ['routeTree.gen.ts', 'src/utils/webp/index.js'],
     options: { typeAware: true, typeCheck: true },
     rules: {
       'no-unused-vars': 'warn',

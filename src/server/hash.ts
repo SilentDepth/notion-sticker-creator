@@ -1,5 +1,5 @@
-import { createHash } from 'node:crypto'
-
-export function md5(input: string): string {
-  return createHash('md5').update(input).digest('hex')
+export async function sha256(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input)
+  const hashBuf = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(hashBuf), b => b.toString(16).padStart(2, '0')).join('')
 }

@@ -108,7 +108,7 @@ function Home() {
   }
 
   return (
-    <main className="isolate min-h-dvh bg-neutral-950 text-white antialiased">
+    <main className="isolate min-h-dvh bg-neutral-950 text-white">
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-5 py-8 sm:px-6 sm:py-10">
         <header className="flex flex-col items-center gap-3 text-center">
           <img src="/icon.png" alt="" className="size-16" />

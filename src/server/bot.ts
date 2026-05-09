@@ -1,5 +1,5 @@
 import * as cache from './cache'
-import { md5 } from './hash'
+import { sha256 } from './hash'
 import { help, helpCalendar, helpPhrase } from './messages'
 import { parseQuery, type QueryArgs } from './query'
 import * as telegram from './telegram'
@@ -126,7 +126,7 @@ async function handleInlineQuery(
 
   if (!sticker) return
 
-  const cacheKey = md5(sticker.key)
+  const cacheKey = await sha256(sticker.key)
   const cached = await cache.get(cacheKey)
 
   if (cached) {
