@@ -1,4 +1,4 @@
-import * as cache from './cache'
+import { useStorage } from 'nitro/storage'
 import { sha256 } from './hash'
 import { help, helpCalendar, helpPhrase } from './messages'
 import { parseQuery, type QueryArgs } from './query'
@@ -9,6 +9,13 @@ import { withAssetBaseUrl } from '@/shared/core/assets'
 import { SupportedFormat } from '@/shared/core/utils'
 
 export { parseQuery } from './query'
+
+interface CacheItem {
+  key: string
+  data: object
+  sticker_file_id: string
+  created_at: string
+}
 
 export async function handleBotHook(request: Request): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token')
@@ -127,7 +134,8 @@ async function handleInlineQuery(
   if (!sticker) return
 
   const cacheKey = await sha256(sticker.key)
-  const cached = await cache.get(cacheKey)
+  const cache = useStorage<CacheItem>('cache')
+  const cached = await cache.getItem(cacheKey)
 
   if (cached) {
     try {
@@ -142,9 +150,12 @@ async function handleInlineQuery(
   const fileId = await telegram.sendSticker(stickerBuffer, Number(queryId))
   await Promise.all([
     telegram.answerInlineQuery(queryId, cacheKey, fileId),
-    cache
-      .put(cacheKey, { key: cacheKey, data: JSON.parse(sticker.key), sticker_file_id: fileId })
-      .catch(() => undefined),
+    cache.setItem(cacheKey, {
+      key: cacheKey,
+      data: JSON.parse(sticker.key),
+      sticker_file_id: fileId,
+      created_at: new Date().toISOString(),
+    }),
   ])
 }
 

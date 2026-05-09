@@ -64,19 +64,7 @@ export default defineConfig({
               enabled: false,
             },
           }),
-          nitro({
-            compatibilityDate: '2026-05-01',
-            preset: 'cloudflare_module',
-            wasm: false,
-            cloudflare: {
-              wrangler: {
-                keep_vars: true,
-                observability: {
-                  enabled: true,
-                },
-              },
-            },
-          }),
+          nitro(),
         ]),
     unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
     viteReact(),
