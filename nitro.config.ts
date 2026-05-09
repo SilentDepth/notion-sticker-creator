@@ -21,6 +21,12 @@ export default defineConfig({
   cloudflare: {
     wrangler: {
       keep_vars: true,
+      kv_namespaces: [
+        {
+          binding: 'CACHE',
+          id: '7f44a9a7dc2b4411a8850e54e0d0406c',
+        },
+      ],
       observability: {
         enabled: true,
       },
