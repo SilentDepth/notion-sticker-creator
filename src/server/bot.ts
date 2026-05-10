@@ -2,8 +2,8 @@ import { useStorage } from 'nitro/storage'
 import { sha256 } from './hash'
 import { help, helpCalendar, helpPhrase } from './messages'
 import { parseQuery, type QueryArgs } from './query'
-import * as telegram from './telegram'
-import type { Telegram } from './telegram-types'
+import type { Telegram } from './utils/telegram'
+import telegram from './utils/telegram'
 import createSticker from '@/shared/core'
 import { withAssetBaseUrl } from '@/shared/core/assets'
 import { SupportedFormat } from '@/shared/core/utils'
@@ -62,7 +62,7 @@ async function handleMessage(update: Telegram.Update<'message'>): Promise<void> 
         await telegram.sendMessage(from.id, help())
         break
       case '/help_phrase':
-        await telegram.sendMessage(from.id, helpPhrase(await telegram.isTester(from.id)))
+        await telegram.sendMessage(from.id, helpPhrase())
         break
       case '/help_calendar':
         await telegram.sendMessage(from.id, helpCalendar())
@@ -106,11 +106,7 @@ async function handleInlineQuery(
         default:
           sticker = createSticker('phrase', {
             ...params,
-            max:
-              process.env.NODE_ENV === 'development' ||
-              (await telegram.isTester(update.inline_query.from.id))
-                ? Infinity
-                : undefined,
+            max: Infinity,
             text,
           })
       }

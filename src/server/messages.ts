@@ -8,7 +8,8 @@ export const help = () =>
 /help_calendar 查看日历贴纸的指令帮助
 `.trim()
 
-export const helpPhrase = (premium?: boolean) =>
+// TODO: Remove premium flag
+export const helpPhrase = (premium = true) =>
   `
 【<b>文字贴纸指令使用说明</b>】
 
