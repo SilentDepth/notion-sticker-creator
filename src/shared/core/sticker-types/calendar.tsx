@@ -55,7 +55,13 @@ export default class CalendarSticker extends Sticker {
 
   renderNode(debug?: boolean) {
     return Sticker.frame(
-      <>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
         <span style={{ fontSize: '50px', height: '1em', transform: 'translateY(-7.1429%)' }}>
           {`${this.dateParts.year} · ${this.dateParts.month}`}
         </span>
@@ -74,7 +80,7 @@ export default class CalendarSticker extends Sticker {
         <span style={{ fontSize: '50px', height: '1em', transform: 'translateY(-7.1429%)' }}>
           {weekday(this.dateParts.weekday, this.locale)}
         </span>
-      </>,
+      </div>,
       debug,
     )
   }
