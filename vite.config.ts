@@ -64,7 +64,7 @@ export default defineConfig({
               enabled: false,
             },
           }),
-          nitro({ rootDir: './src' }),
+          nitro(),
         ]),
     unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
     viteReact(),
