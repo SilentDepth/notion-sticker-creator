@@ -2,3 +2,12 @@ allowBuilds:
   esbuild: true
   sharp: false
   workerd: true
+
+overrides:
+  vite: npm:@voidzero-dev/vite-plus-core@0.2.1
+
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: '*'
