@@ -40,6 +40,7 @@ export default class PhraseSticker extends Sticker {
                   width: '1em',
                   height: '1em',
                   fontSize,
+                  fontFamily: 'Noto Serif SC',
                   lineHeight: 1,
                   color: this.graphemes[gIdx].color,
                   ...(debug
