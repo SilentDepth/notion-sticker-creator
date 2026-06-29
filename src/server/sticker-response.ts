@@ -23,7 +23,7 @@ async function createStickerResponse(
     })
   }
 
-  const buffer = await sticker.render().toBuffer(resolvedFormat)
+  const buffer = await sticker.render(resolvedFormat).toBuffer()
   return new Response(new Uint8Array(buffer), {
     headers: { 'Content-Type': resolveMime(resolvedFormat) },
   })

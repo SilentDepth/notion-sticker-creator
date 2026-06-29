@@ -30,7 +30,7 @@ export default class PhraseSticker extends Sticker {
       Array.from({ length: rowSize }, (_, rowIdx) => (
         <div key={rowIdx} style={{ display: 'flex' }}>
           {Array.from({ length: rowSize }, (_, colIdx) => {
-            const graphemeIdx = rowIdx * rowSize + colIdx
+            const gIdx = rowIdx * rowSize + colIdx
             return (
               <div
                 key={colIdx}
@@ -40,13 +40,22 @@ export default class PhraseSticker extends Sticker {
                   width: '1em',
                   height: '1em',
                   fontSize,
-                  color: this.graphemes[graphemeIdx].color,
-                  ...(debug ? { boxShadow: '0 0 0 1px #f0f' } : {}),
+                  lineHeight: 1,
+                  color: this.graphemes[gIdx].color,
+                  ...(debug
+                    ? { background: '#f0f3', outline: '1px solid #f0f', outlineOffset: -1 }
+                    : {}),
                 }}
               >
-                <span style={{ height: '100%', transform: 'translateY(-7.1429%)' }}>
-                  {this.graphemes[graphemeIdx].value}
-                </span>
+                <div
+                  style={{
+                    translate: /\p{Extended_Pictographic}/u.test(this.graphemes[gIdx].value)
+                      ? '-10% 0'
+                      : '0 -5%',
+                  }}
+                >
+                  {this.graphemes[gIdx].value}
+                </div>
               </div>
             )
           })}

@@ -1,13 +1,11 @@
+import { cloudflare } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
-import { nitro } from 'nitro/vite'
 import icons from 'unplugin-icons/vite'
-import { unwasm } from 'unwasm/plugin'
 import { defineConfig } from 'vite-plus'
 
-const useWasmEsmImport = process.env.NODE_ENV !== 'development'
 const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
 
 export default defineConfig({
@@ -56,6 +54,7 @@ export default defineConfig({
       ? []
       : [
           devtools(),
+          cloudflare({ viteEnvironment: { name: 'ssr' } }),
           tanstackStart({
             spa: {
               enabled: false,
@@ -64,9 +63,7 @@ export default defineConfig({
               enabled: false,
             },
           }),
-          nitro(),
         ]),
-    unwasm({ esmImport: useWasmEsmImport, lazy: useWasmEsmImport }),
     viteReact(),
     icons({
       compiler: 'jsx',

@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "silentdepth-notion-sticker-creator",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/server.ts",
+  "keep_vars": true,
+  "observability": {
+    "enabled": true,
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "dist/client",
+  },
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "7f44a9a7dc2b4411a8850e54e0d0406c",
+    },
+  ],
+}
