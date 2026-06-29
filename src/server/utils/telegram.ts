@@ -3,7 +3,7 @@ import type { JsonObject, JsonValue } from 'type-fest'
 export namespace Telegram {
   export interface Response<T = unknown> {
     ok: boolean
-    result: T
+    result?: T
     description?: string
   }
 
@@ -92,20 +92,26 @@ class Telegram {
   }
 
   async call<T>(method: string, payload?: JsonObject | FormData) {
-    return fetch(`https://api.telegram.org/bot${this.token}/${method}`, {
+    const isFormData = payload instanceof FormData
+    const response = await fetch(`https://api.telegram.org/bot${this.token}/${method}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': payload instanceof FormData ? 'multipart/form-data' : 'application/json',
-      },
-      body: payload && (payload instanceof FormData ? payload : JSON.stringify(payload)),
+      headers: isFormData ? undefined : { 'Content-Type': 'application/json' },
+      body: payload && (isFormData ? payload : JSON.stringify(payload)),
     })
-      .then<Telegram.Response<T>>(res => res.json())
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(res.description || `Failed to request Telegram API (${method})`)
-        }
-        return res.result
-      })
+
+    const text = await response.text()
+    let body: Telegram.Response<T> | undefined
+
+    try {
+      body = text ? (JSON.parse(text) as Telegram.Response<T>) : undefined
+    } catch {}
+
+    if (!response.ok || !body?.ok) {
+      const description = body?.description || text || response.statusText
+      throw new Error(`Telegram API ${method} failed: ${description}`)
+    }
+
+    return body.result as T
   }
 
   async sendMessage(chat_id: number, text: string) {
