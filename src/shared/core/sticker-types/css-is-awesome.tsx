@@ -19,6 +19,8 @@ export default class CssIsAwesomeSticker extends Sticker {
           height: '100%',
           padding: '4px 12px',
           fontSize: '81px',
+          lineHeight: 1,
+          fontFamily: 'Noto Serif SC',
         }}
       >
         <span>CSS</span>
