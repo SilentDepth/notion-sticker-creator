@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TakumiRouteImport } from './routes/takumi'
 import { Route as DevRouteImport } from './routes/dev'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,11 +17,6 @@ import { Route as ApiStickerFilenameRouteImport } from './routes/api/sticker/$fi
 import { Route as ApiStickerGenerateQrcodeRouteImport } from './routes/api/sticker/generate/qrcode'
 import { Route as ApiStickerGenerateCalendarRouteImport } from './routes/api/sticker/generate/calendar'
 
-const TakumiRoute = TakumiRouteImport.update({
-  id: '/takumi',
-  path: '/takumi',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DevRoute = DevRouteImport.update({
   id: '/dev',
   path: '/dev',
@@ -65,7 +59,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
   '/dev': typeof DevRoute
-  '/takumi': typeof TakumiRoute
   '/api/bot-hook': typeof ApiBotHookRoute
   '/api/sticker/$filename': typeof ApiStickerFilenameRoute
   '/api/sticker/generate/calendar': typeof ApiStickerGenerateCalendarRoute
@@ -75,7 +68,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
   '/dev': typeof DevRoute
-  '/takumi': typeof TakumiRoute
   '/api/bot-hook': typeof ApiBotHookRoute
   '/api/sticker/$filename': typeof ApiStickerFilenameRoute
   '/api/sticker/generate/calendar': typeof ApiStickerGenerateCalendarRoute
@@ -86,7 +78,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
   '/dev': typeof DevRoute
-  '/takumi': typeof TakumiRoute
   '/api/bot-hook': typeof ApiBotHookRoute
   '/api/sticker/$filename': typeof ApiStickerFilenameRoute
   '/api/sticker/generate/calendar': typeof ApiStickerGenerateCalendarRoute
@@ -98,7 +89,6 @@ export interface FileRouteTypes {
     | '/'
     | '/design'
     | '/dev'
-    | '/takumi'
     | '/api/bot-hook'
     | '/api/sticker/$filename'
     | '/api/sticker/generate/calendar'
@@ -108,7 +98,6 @@ export interface FileRouteTypes {
     | '/'
     | '/design'
     | '/dev'
-    | '/takumi'
     | '/api/bot-hook'
     | '/api/sticker/$filename'
     | '/api/sticker/generate/calendar'
@@ -118,7 +107,6 @@ export interface FileRouteTypes {
     | '/'
     | '/design'
     | '/dev'
-    | '/takumi'
     | '/api/bot-hook'
     | '/api/sticker/$filename'
     | '/api/sticker/generate/calendar'
@@ -129,7 +117,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DesignRoute: typeof DesignRoute
   DevRoute: typeof DevRoute
-  TakumiRoute: typeof TakumiRoute
   ApiBotHookRoute: typeof ApiBotHookRoute
   ApiStickerFilenameRoute: typeof ApiStickerFilenameRoute
   ApiStickerGenerateCalendarRoute: typeof ApiStickerGenerateCalendarRoute
@@ -138,13 +125,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/takumi': {
-      id: '/takumi'
-      path: '/takumi'
-      fullPath: '/takumi'
-      preLoaderRoute: typeof TakumiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dev': {
       id: '/dev'
       path: '/dev'
@@ -201,7 +181,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DesignRoute: DesignRoute,
   DevRoute: DevRoute,
-  TakumiRoute: TakumiRoute,
   ApiBotHookRoute: ApiBotHookRoute,
   ApiStickerFilenameRoute: ApiStickerFilenameRoute,
   ApiStickerGenerateCalendarRoute: ApiStickerGenerateCalendarRoute,
