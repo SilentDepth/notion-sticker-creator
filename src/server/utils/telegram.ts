@@ -75,20 +75,14 @@ export namespace Telegram {
 }
 
 class Telegram {
-  private readonly token = process.env.TG_BOT_TOKEN
-  private readonly driveChats = process.env.TG_CHAT_DRIVE.split(',').filter(Boolean)
+  private get token(): string {
+    return requireEnv('TG_BOT_TOKEN')
+  }
 
-  constructor() {
-    const missing = [] as string[]
-    if (!this.token) {
-      missing.push('TG_BOT_TOKEN')
-    }
-    if (!this.driveChats) {
-      missing.push('TG_CHAT_DRIVE')
-    }
-    if (missing.length) {
-      throw new Error(`Missing environment variables: ${missing.join(', ')}`)
-    }
+  private get driveChats(): string[] {
+    const chats = requireEnv('TG_CHAT_DRIVE').split(',').filter(Boolean)
+    if (!chats.length) throw new Error('Missing environment variables: TG_CHAT_DRIVE')
+    return chats
   }
 
   async call<T>(method: string, payload?: JsonObject | FormData) {
@@ -143,6 +137,12 @@ class Telegram {
       cache_time: import.meta.env.DEV ? 0 : (undefined as unknown as JsonValue),
     })
   }
+}
+
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) throw new Error(`Missing environment variables: ${name}`)
+  return value
 }
 
 export default new Telegram()
