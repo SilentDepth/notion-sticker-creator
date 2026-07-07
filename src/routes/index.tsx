@@ -1,6 +1,6 @@
 import { useIntersection } from '@mantine/hooks'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRef } from 'react'
 import MingcuteCheckLine from '~icons/mingcute/check-line'
 import MingcuteCopy2Line from '~icons/mingcute/copy-2-line'
 import MingcuteDownload2Line from '~icons/mingcute/download-2-line'
@@ -12,100 +12,38 @@ import MingcuteText2Line from '~icons/mingcute/text-2-line'
 import { AsyncButton } from '@/components/async-button'
 import { ColorInput } from '@/components/color-input'
 import { NotionSticker, type NotionStickerHandle } from '@/components/notion-sticker'
-import { splitGraphemes, supportCanvasWebpDataURL } from '@/libs/feature-detect'
-import { generateCanvas } from '@/libs/sticker-canvas'
-
-const MAX = 9
-const DEFAULT_COLOR = '#000000'
+import {
+  DEFAULT_STICKER_COLOR,
+  MAX_STICKER_TEXT_LENGTH,
+  useStickerEditorState,
+  useStickerExport,
+} from '@/features/sticker-editor'
 
 export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
   const stickerRef = useRef<NotionStickerHandle>(null)
-  const [text, setText] = useState('你好世界')
-  const [colors, setColors] = useState([DEFAULT_COLOR])
-  const [multiColor, setMultiColor] = useState(false)
   const { ref: stickyRef, entry } = useIntersection({ threshold: 1 })
-
-  const graphemes = useMemo(() => splitGraphemes(text), [text])
-  const effectiveColors = useMemo(
-    () => graphemes.map((_, idx) => colors[idx] || DEFAULT_COLOR),
-    [colors, graphemes],
-  )
-  const stickerColor = multiColor ? effectiveColors.join(',') : colors[0] || DEFAULT_COLOR
-  const colorMatrixSize = multiColor ? Math.ceil(Math.sqrt(Math.max(graphemes.length, 1))) : 1
   const isStickyTriggered = entry ? !entry.isIntersecting : false
-
-  const stickerParams = useMemo(() => ({ text, color: stickerColor }), [stickerColor, text])
-
-  useEffect(() => {
-    setColors(current => {
-      if (!multiColor) return [current[0] || DEFAULT_COLOR]
-
-      return Array.from(
-        { length: Math.max(graphemes.length, 1) },
-        (_, idx) => current[idx] || DEFAULT_COLOR,
-      )
-    })
-  }, [graphemes.length, multiColor])
-
-  async function downloadSticker(format: 'png' | 'webp') {
-    const svg = getStickerSvg()
-    const href =
-      format === 'webp' && !supportCanvasWebpDataURL()
-        ? `/api/sticker/${encodeURIComponent(text)}.webp?color=${encodeURIComponent(stickerColor)}`
-        : (await generateCanvas(svg)).toDataURL(`image/${format}`)
-
-    const anchor = document.createElement('a')
-    anchor.href = href
-    anchor.download = `notion-sticker.${format}`
-    anchor.click()
-    anchor.remove()
-  }
-
-  async function copyStickerPng() {
-    if (!('ClipboardItem' in window)) {
-      throw new Error('Clipboard image copy is unavailable in this browser')
-    }
-
-    const type = 'image/png'
-    const canvas = await generateCanvas(getStickerSvg())
-    const blob = await canvasToBlob(canvas, type)
-    await navigator.clipboard.write([new ClipboardItem({ [type]: blob })])
-  }
-
-  async function copyCommand() {
-    const commandColors = (multiColor ? effectiveColors : [colors[0] || DEFAULT_COLOR])
-      .map(color => (color.toLowerCase() === DEFAULT_COLOR ? '' : color))
-      .join(',')
-      .replace(/^,+$/, '')
-
-    const command = [
-      '@NotionStickerBot',
-      text.replaceAll(/([ =\\])/g, '\\$1'),
-      commandColors ? `color=${commandColors}` : '',
-    ]
-      .filter(Boolean)
-      .join(' ')
-
-    await navigator.clipboard.writeText(command)
-  }
-
-  function updateColor(idx: number, value: string) {
-    setColors(current => {
-      const next = [...current]
-      next[idx] = value
-      return next
-    })
-  }
-
-  function getStickerSvg() {
-    const svg = stickerRef.current?.getSvgElement()
-    if (!svg) {
-      throw new Error('Sticker preview is not ready')
-    }
-    return svg
-  }
+  const {
+    colorMatrixSize,
+    effectiveColors,
+    graphemes,
+    multiColor,
+    setMultiColor,
+    setText,
+    stickerParams,
+    text,
+    updateColor,
+    ...exportState
+  } = useStickerEditorState()
+  const { copyCommand, copyStickerPng, downloadSticker } = useStickerExport({
+    ...exportState,
+    effectiveColors,
+    multiColor,
+    stickerRef,
+    text,
+  })
 
   return (
     <main className="isolate min-h-dvh bg-neutral-950 text-white">
@@ -139,13 +77,13 @@ function Home() {
               <MingcuteText2Line className="size-4 shrink-0 text-neutral-400" />
               <h2 className="font-medium">文字</h2>
               <span className="ml-auto tabular-nums text-neutral-500">
-                {graphemes.length}/{MAX}
+                {graphemes.length}/{MAX_STICKER_TEXT_LENGTH}
               </span>
             </div>
             <input
               aria-label="贴纸文字"
               className="h-12 rounded-md bg-neutral-900 px-4 text-center text-xl text-white ring-1 ring-white/10 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:h-10 sm:text-lg"
-              maxLength={MAX}
+              maxLength={MAX_STICKER_TEXT_LENGTH}
               name="text"
               type="text"
               value={text}
@@ -187,7 +125,7 @@ function Home() {
                     className={`ring-1 ring-neutral-500/70 ${cellRadius(idx, colorMatrixSize)}`}
                     disabled={disabled}
                     disabledClassName="ring-neutral-800"
-                    value={effectiveColors[idx] || DEFAULT_COLOR}
+                    value={effectiveColors[idx] || DEFAULT_STICKER_COLOR}
                     onChange={value => updateColor(idx, value)}
                   />
                 )
@@ -274,16 +212,4 @@ function cellRadius(idx: number, size: number): string {
   if (idx === size * (size - 1)) classes.push('rounded-bl-md')
   if (idx === size ** 2 - 1) classes.push('rounded-br-md')
   return classes.join(' ')
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(blob => {
-      if (blob) {
-        resolve(blob)
-      } else {
-        reject(new Error('Failed to create image blob'))
-      }
-    }, type)
-  })
 }

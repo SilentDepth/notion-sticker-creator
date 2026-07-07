@@ -1,9 +1,16 @@
+import { hash } from 'ohash'
 import { sanitize, split } from '@/shared/core/utils.js'
 
 export interface PhraseParams {
   text: string
   color?: string
   max?: number
+}
+
+export interface NormalizedPhraseParams {
+  text: string
+  color: string
+  max: number
 }
 
 export interface Grapheme {
@@ -14,34 +21,52 @@ export interface Grapheme {
 export const BLANK = { value: ' ', color: '#000000' } satisfies Grapheme
 
 export function createPhraseGraphemes(params: PhraseParams): Grapheme[] {
-  params.max ??=
-    typeof process !== 'undefined' && process.env.NODE_ENV === 'development' ? Infinity : 9
+  const normalizedParams = normalizePhraseParams(params)
+  const graphemes = parsePhraseInput(normalizedParams)
 
-  const graphemes = parsePhraseParams(params)
+  return layoutPhraseGraphemes(graphemes, normalizedParams.max)
+}
+
+export function normalizePhraseParams(params: PhraseParams): NormalizedPhraseParams {
+  return {
+    text: normalizePhraseText(params.text),
+    color: params.color ?? '',
+    max: params.max ?? defaultPhraseMax(),
+  }
+}
+
+export function layoutPhraseGraphemes(graphemes: Grapheme[], max: number): Grapheme[] {
+  const layout = [...graphemes]
   switch (graphemes.length) {
     // Handle 2-char special case, which should be rendered as:
     // A .
     // . B
     case 2:
-      graphemes.splice(1, 0, BLANK, BLANK)
+      layout.splice(1, 0, BLANK, BLANK)
+      break
+    // 3-char special case:
+    // . . .
+    // A B C
+    // . . .
+    case 3:
+      layout.unshift(BLANK, BLANK, BLANK)
       break
     default: {
-      if (graphemes.length > params.max) {
-        graphemes.splice(params.max, Infinity)
+      if (layout.length > max) {
+        layout.splice(max, Infinity)
       } else {
-        const gridSize = Math.ceil(Math.sqrt(graphemes.length))
-        graphemes.push(...Array.from({ length: gridSize ** 2 - graphemes.length }, () => BLANK))
+        const gridSize = Math.ceil(Math.sqrt(layout.length))
+        layout.push(...Array.from({ length: gridSize ** 2 - layout.length }, () => BLANK))
       }
     }
   }
-  return graphemes
+  return layout
 }
 
 export function createPhraseKey(type: 'phrase', graphemes: Grapheme[]): string {
-  return JSON.stringify({
+  return hash({
     type,
-    text: graphemes.map(g => g.value).join(''),
-    color: graphemes.map(g => g.color).join(','),
+    graphemes: graphemes.map(({ value, color }) => ({ value, color })),
   })
 }
 
@@ -65,6 +90,12 @@ export function normalizePhraseColor(raw: string): string {
 }
 
 export function parsePhraseParams(params: PhraseParams): Grapheme[] {
+  return parsePhraseInput(normalizePhraseParams(params))
+}
+
+export function parsePhraseInput(
+  params: Pick<NormalizedPhraseParams, 'text' | 'color'>,
+): Grapheme[] {
   // Advanced input
   if (params.text.startsWith('#')) {
     const [, text = '', rotate = ''] = params.text.match(/^#(.+)(?!\\)\$(r?)$/su) ?? []
@@ -184,4 +215,8 @@ export function parsePhraseParams(params: PhraseParams): Grapheme[] {
     value,
     color: normalizePhraseColor(colors[idx]) || '#000000',
   }))
+}
+
+function defaultPhraseMax(): number {
+  return typeof process !== 'undefined' && process.env.NODE_ENV === 'development' ? Infinity : 9
 }

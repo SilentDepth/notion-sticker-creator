@@ -12,7 +12,7 @@ export const Route = createFileRoute('/api/bot-hook')({
     handlers: {
       // @ts-ignore
       POST: async ({ context, request }: BotHookHandlerArgs) =>
-        handleBotHook(request, context.cloudflare.env.CACHE),
+        handleBotHook(request, context.cloudflare.env.CACHE, context.cloudflare.env.ASSETS),
     },
   },
 })

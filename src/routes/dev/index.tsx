@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { requireDevRoute } from './-guard'
 import { NotionSticker } from '@/components/notion-sticker'
 
 type Demo = 'phrase' | 'calendar' | 'css-is-awesome'
 
-export const Route = createFileRoute('/dev')({ component: Dev })
+export const Route = createFileRoute('/dev/')({ beforeLoad: requireDevRoute, component: Dev })
 
 function Dev() {
   const [demo, setDemo] = useState<Demo>('phrase')
@@ -15,7 +16,7 @@ function Dev() {
   const [locale, setLocale] = useState('')
 
   return (
-    <main className="isolate flex min-h-dvh flex-col bg-neutral-800 text-neutral-200 antialiased">
+    <main className="min-h-dvh flex flex-col text-neutral-200 antialiased">
       <nav className="flex flex-wrap justify-center border-b border-white/10">
         {(['phrase', 'calendar', 'css-is-awesome'] as const).map(item => (
           <button
@@ -30,7 +31,6 @@ function Dev() {
           </button>
         ))}
       </nav>
-
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
         {demo === 'calendar' ? (
           <NotionSticker

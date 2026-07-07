@@ -17,11 +17,3 @@ export interface ServerContext {
     env: CloudflareEnv
   }
 }
-
-interface CloudflareGlobal {
-  __env__?: CloudflareEnv
-}
-
-export function installCloudflareEnv(env: CloudflareEnv): void {
-  ;(globalThis as typeof globalThis & CloudflareGlobal).__env__ = env
-}

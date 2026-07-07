@@ -9,27 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DevRouteImport } from './routes/dev'
-import { Route as DesignRouteImport } from './routes/design'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DevIndexRouteImport } from './routes/dev/index'
+import { Route as DevTakumiRouteImport } from './routes/dev/takumi'
 import { Route as ApiBotHookRouteImport } from './routes/api/bot-hook'
 import { Route as ApiStickerFilenameRouteImport } from './routes/api/sticker/$filename'
 import { Route as ApiStickerGenerateQrcodeRouteImport } from './routes/api/sticker/generate/qrcode'
 import { Route as ApiStickerGenerateCalendarRouteImport } from './routes/api/sticker/generate/calendar'
 
-const DevRoute = DevRouteImport.update({
-  id: '/dev',
-  path: '/dev',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DesignRoute = DesignRouteImport.update({
-  id: '/design',
-  path: '/design',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevIndexRoute = DevIndexRouteImport.update({
+  id: '/dev/',
+  path: '/dev/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevTakumiRoute = DevTakumiRouteImport.update({
+  id: '/dev/takumi',
+  path: '/dev/takumi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBotHookRoute = ApiBotHookRouteImport.update({
@@ -57,18 +57,18 @@ const ApiStickerGenerateCalendarRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/design': typeof DesignRoute
-  '/dev': typeof DevRoute
   '/api/bot-hook': typeof ApiBotHookRoute
+  '/dev/takumi': typeof DevTakumiRoute
+  '/dev/': typeof DevIndexRoute
   '/api/sticker/$filename': typeof ApiStickerFilenameRoute
   '/api/sticker/generate/calendar': typeof ApiStickerGenerateCalendarRoute
   '/api/sticker/generate/qrcode': typeof ApiStickerGenerateQrcodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/design': typeof DesignRoute
-  '/dev': typeof DevRoute
   '/api/bot-hook': typeof ApiBotHookRoute
+  '/dev/takumi': typeof DevTakumiRoute
+  '/dev': typeof DevIndexRoute
   '/api/sticker/$filename': typeof ApiStickerFilenameRoute
   '/api/sticker/generate/calendar': typeof ApiStickerGenerateCalendarRoute
   '/api/sticker/generate/qrcode': typeof ApiStickerGenerateQrcodeRoute
@@ -76,9 +76,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/design': typeof DesignRoute
-  '/dev': typeof DevRoute
   '/api/bot-hook': typeof ApiBotHookRoute
+  '/dev/takumi': typeof DevTakumiRoute
+  '/dev/': typeof DevIndexRoute
   '/api/sticker/$filename': typeof ApiStickerFilenameRoute
   '/api/sticker/generate/calendar': typeof ApiStickerGenerateCalendarRoute
   '/api/sticker/generate/qrcode': typeof ApiStickerGenerateQrcodeRoute
@@ -87,27 +87,27 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/design'
-    | '/dev'
     | '/api/bot-hook'
+    | '/dev/takumi'
+    | '/dev/'
     | '/api/sticker/$filename'
     | '/api/sticker/generate/calendar'
     | '/api/sticker/generate/qrcode'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/design'
-    | '/dev'
     | '/api/bot-hook'
+    | '/dev/takumi'
+    | '/dev'
     | '/api/sticker/$filename'
     | '/api/sticker/generate/calendar'
     | '/api/sticker/generate/qrcode'
   id:
     | '__root__'
     | '/'
-    | '/design'
-    | '/dev'
     | '/api/bot-hook'
+    | '/dev/takumi'
+    | '/dev/'
     | '/api/sticker/$filename'
     | '/api/sticker/generate/calendar'
     | '/api/sticker/generate/qrcode'
@@ -115,9 +115,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DesignRoute: typeof DesignRoute
-  DevRoute: typeof DevRoute
   ApiBotHookRoute: typeof ApiBotHookRoute
+  DevTakumiRoute: typeof DevTakumiRoute
+  DevIndexRoute: typeof DevIndexRoute
   ApiStickerFilenameRoute: typeof ApiStickerFilenameRoute
   ApiStickerGenerateCalendarRoute: typeof ApiStickerGenerateCalendarRoute
   ApiStickerGenerateQrcodeRoute: typeof ApiStickerGenerateQrcodeRoute
@@ -125,25 +125,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/dev': {
-      id: '/dev'
-      path: '/dev'
-      fullPath: '/dev'
-      preLoaderRoute: typeof DevRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/design': {
-      id: '/design'
-      path: '/design'
-      fullPath: '/design'
-      preLoaderRoute: typeof DesignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dev/': {
+      id: '/dev/'
+      path: '/dev'
+      fullPath: '/dev/'
+      preLoaderRoute: typeof DevIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dev/takumi': {
+      id: '/dev/takumi'
+      path: '/dev/takumi'
+      fullPath: '/dev/takumi'
+      preLoaderRoute: typeof DevTakumiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bot-hook': {
@@ -179,9 +179,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DesignRoute: DesignRoute,
-  DevRoute: DevRoute,
   ApiBotHookRoute: ApiBotHookRoute,
+  DevTakumiRoute: DevTakumiRoute,
+  DevIndexRoute: DevIndexRoute,
   ApiStickerFilenameRoute: ApiStickerFilenameRoute,
   ApiStickerGenerateCalendarRoute: ApiStickerGenerateCalendarRoute,
   ApiStickerGenerateQrcodeRoute: ApiStickerGenerateQrcodeRoute,

@@ -1,33 +1,43 @@
-import Sticker from '@/shared/core/sticker.js'
+import { hash } from 'ohash'
+import { Component as Frame } from './notion-logo-frame'
 
-export default class CssIsAwesomeSticker extends Sticker {
-  constructor() {
-    super('css-is-awesome')
-  }
+export const getKey = () => hash({ type: 'css-is-awesome' })
 
-  get key(): string {
-    return JSON.stringify({ type: this.type })
-  }
+export interface ComponentProps {
+  debug?: boolean
+}
 
-  renderNode(debug?: boolean) {
-    return Sticker.frame(
+export function Component({ debug }: ComponentProps) {
+  const pStyle = Object.assign(
+    { margin: 0 },
+    debug ? { outline: '1px solid #f0f', outlineOffset: -1 } : undefined,
+  )
+  const spanStyle = { display: 'block', transform: 'translateY(-5%)' }
+
+  return (
+    <Frame debug={debug}>
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
           height: '100%',
           padding: '4px 12px',
-          fontSize: '81px',
-          lineHeight: 1,
           fontFamily: 'Noto Serif SC',
+          fontSize: 81,
+          lineHeight: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
         }}
       >
-        <span>CSS</span>
-        <span style={{ margin: 'auto 0' }}>IS</span>
-        <span>AWESOME</span>
-      </div>,
-      debug,
-    )
-  }
+        <p style={pStyle}>
+          <span style={spanStyle}>CSS</span>
+        </p>
+        <p style={pStyle}>
+          <span style={spanStyle}>IS</span>
+        </p>
+        <p style={pStyle}>
+          <span style={spanStyle}>AWESOME</span>
+        </p>
+      </div>
+    </Frame>
+  )
 }

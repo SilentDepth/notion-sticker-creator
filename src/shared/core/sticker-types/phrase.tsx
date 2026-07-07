@@ -1,80 +1,77 @@
+import { Component as Frame } from './notion-logo-frame'
+import { FACE_SIZE } from '@/shared/core/constants'
 import {
   createPhraseGraphemes,
   createPhraseKey,
   normalizePhraseColor,
   normalizePhraseText,
   parsePhraseParams,
-  type Grapheme,
   type PhraseParams,
 } from '@/shared/core/sticker-types/phrase-data.js'
-import Sticker from '@/shared/core/sticker.js'
 
-export default class PhraseSticker extends Sticker {
-  readonly graphemes: Grapheme[]
+export const normalizeText = normalizePhraseText
+export const normalizeColor = normalizePhraseColor
+export const parseParams = parsePhraseParams
 
-  constructor(params: PhraseParams) {
-    super('phrase')
+export const getKey = (params: PhraseParams) =>
+  createPhraseKey('phrase', createPhraseGraphemes({ ...params }))
 
-    this.graphemes = createPhraseGraphemes(params)
-  }
+const RE_EMOJI = /\p{Extended_Pictographic}/u
 
-  get key(): string {
-    this._key ??= createPhraseKey('phrase', this.graphemes)
-    return this._key
-  }
+export interface ComponentProps extends PhraseParams {
+  debug?: boolean
+}
 
-  renderNode(debug?: boolean) {
-    const rowSize = Math.ceil(Math.sqrt(this.graphemes.length))
-    const fontSize = 316 / (rowSize + 0.5)
-    return Sticker.frame(
-      Array.from({ length: rowSize }, (_, rowIdx) => (
-        <div key={rowIdx} style={{ display: 'flex' }}>
-          {Array.from({ length: rowSize }, (_, colIdx) => {
-            const gIdx = rowIdx * rowSize + colIdx
-            return (
-              <div
-                key={colIdx}
+export function Component({ debug, ...params }: ComponentProps) {
+  const graphemes = createPhraseGraphemes(params)
+  const gridSize = Math.ceil(Math.sqrt(graphemes.length))
+  const gridTemplate = `0.25fr repeat(${gridSize}, 1fr) 0.25fr`
+  const fontSize = FACE_SIZE / (gridSize + 0.5)
+
+  return (
+    <Frame debug={debug}>
+      <div
+        style={{
+          height: '100%',
+          fontSize,
+          fontFamily: 'Noto Serif SC',
+          lineHeight: 1,
+          display: 'grid',
+          gridTemplateRows: gridTemplate,
+          gridTemplateColumns: gridTemplate,
+        }}
+      >
+        {graphemes.map((it, gIdx) => {
+          const rowIdx = Math.floor(gIdx / gridSize)
+          const colIdx = gIdx % gridSize
+          return (
+            <div
+              key={gIdx}
+              style={Object.assign(
+                {
+                  gridRowStart: rowIdx + 2,
+                  gridColumnStart: colIdx + 2,
+                  width: '100%',
+                  height: '100%',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: it.color,
+                },
+                debug ? { outline: '1px solid #f0f', outlineOffset: -1 } : undefined,
+              )}
+            >
+              <span
                 style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  width: '1em',
-                  height: '1em',
-                  fontSize,
-                  fontFamily: 'Noto Serif SC',
-                  lineHeight: 1,
-                  color: this.graphemes[gIdx].color,
-                  ...(debug
-                    ? { background: '#f0f3', outline: '1px solid #f0f', outlineOffset: -1 }
-                    : {}),
+                  display: 'block',
+                  transform: RE_EMOJI.test(it.value) ? 'translateX(-10%)' : 'translateY(-5%)',
                 }}
               >
-                <div
-                  style={{
-                    translate: /\p{Extended_Pictographic}/u.test(this.graphemes[gIdx].value)
-                      ? '-10% 0'
-                      : '0 -5%',
-                  }}
-                >
-                  {this.graphemes[gIdx].value}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )),
-      debug,
-    )
-  }
-
-  static normalizeText(raw: string): string {
-    return normalizePhraseText(raw)
-  }
-
-  static normalizeColor(raw: string): string {
-    return normalizePhraseColor(raw)
-  }
-
-  static parseParams(params: PhraseParams): Grapheme[] {
-    return parsePhraseParams(params)
-  }
+                {it.value}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </Frame>
+  )
 }

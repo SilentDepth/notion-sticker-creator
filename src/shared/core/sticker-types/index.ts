@@ -1,35 +1,113 @@
-import CalendarSticker from '@/shared/core/sticker-types/calendar.js'
-import CssIsAwesomeSticker from '@/shared/core/sticker-types/css-is-awesome.js'
-import NotionCalendarLogoSticker from '@/shared/core/sticker-types/notion-calendar.js'
-import NotionLogoSticker from '@/shared/core/sticker-types/notion.js'
-import PhraseSticker from '@/shared/core/sticker-types/phrase.js'
-import QrcodeSticker from '@/shared/core/sticker-types/qrcode.js'
+import {
+  Component as CalendarComponent,
+  getKey as getCalendarKey,
+  normalizeParams as normalizeCalendarParams,
+  type Params as CalendarParams,
+} from '@/shared/core/sticker-types/calendar.js'
+import {
+  Component as CssIsAwesomeComponent,
+  getKey as getCssIsAwesomeKey,
+} from '@/shared/core/sticker-types/css-is-awesome.js'
+import {
+  Component as NotionCalendarLogoComponent,
+  getKey as getNotionCalendarLogoKey,
+} from '@/shared/core/sticker-types/notion-calendar.js'
+import {
+  Component as NotionLogoComponent,
+  getKey as getNotionLogoKey,
+} from '@/shared/core/sticker-types/notion.js'
+import { createPhraseGraphemes } from '@/shared/core/sticker-types/phrase-data.js'
+import {
+  Component as PhraseComponent,
+  getKey as getPhraseKey,
+  type ComponentProps as PhraseParams,
+} from '@/shared/core/sticker-types/phrase.js'
+import {
+  Component as QrcodeComponent,
+  getKey as getQrcodeKey,
+  type Params as QrcodeParams,
+} from '@/shared/core/sticker-types/qrcode.js'
+import { createStickerRenderer } from '@/shared/core/sticker.js'
 
-export {
-  PhraseSticker,
-  CalendarSticker,
-  QrcodeSticker,
-  CssIsAwesomeSticker,
-  NotionLogoSticker,
-  NotionCalendarLogoSticker,
-}
+export const stickerRegistry = {
+  phrase: {
+    type: 'phrase',
+    normalize: createPhraseGraphemes,
+    getKey: getPhraseKey,
+    Component: PhraseComponent,
+    create: (params: PhraseParams) =>
+      createStickerRenderer(
+        { type: 'phrase', Component: PhraseComponent, getKey: getPhraseKey },
+        params,
+      ),
+  },
+  calendar: {
+    type: 'calendar',
+    normalize: normalizeCalendarParams,
+    getKey: getCalendarKey,
+    Component: CalendarComponent,
+    create: (params: CalendarParams = {}) =>
+      createStickerRenderer(
+        { type: 'calendar', Component: CalendarComponent, getKey: getCalendarKey },
+        params,
+      ),
+  },
+  qrcode: {
+    type: 'qrcode',
+    normalize: (params: QrcodeParams) => params,
+    getKey: getQrcodeKey,
+    Component: QrcodeComponent,
+    create: (params: QrcodeParams) =>
+      createStickerRenderer(
+        { type: 'qrcode', Component: QrcodeComponent, getKey: getQrcodeKey },
+        params,
+      ),
+  },
+  'css-is-awesome': {
+    type: 'css-is-awesome',
+    normalize: () => undefined,
+    getKey: getCssIsAwesomeKey,
+    Component: CssIsAwesomeComponent,
+    create: () =>
+      createStickerRenderer(
+        { type: 'css-is-awesome', Component: CssIsAwesomeComponent, getKey: getCssIsAwesomeKey },
+        {},
+      ),
+  },
+  notion: {
+    type: 'notion',
+    normalize: () => undefined,
+    getKey: getNotionLogoKey,
+    Component: NotionLogoComponent,
+    create: () =>
+      createStickerRenderer(
+        { type: 'notion', Component: NotionLogoComponent, getKey: getNotionLogoKey },
+        {},
+      ),
+  },
+  'notion-calendar': {
+    type: 'notion-calendar',
+    normalize: () => undefined,
+    getKey: getNotionCalendarLogoKey,
+    Component: NotionCalendarLogoComponent,
+    create: () =>
+      createStickerRenderer(
+        {
+          type: 'notion-calendar',
+          Component: NotionCalendarLogoComponent,
+          getKey: getNotionCalendarLogoKey,
+        },
+        {},
+      ),
+  },
+} as const
 
-export type StickerClassMap = {
-  phrase: PhraseSticker
-  calendar: CalendarSticker
-  qrcode: QrcodeSticker
-  'css-is-awesome': CssIsAwesomeSticker
-  notion: NotionLogoSticker
-  'notion-calendar': NotionCalendarLogoSticker
-}
-export type StickerClassCtorMap = {
-  phrase: typeof PhraseSticker
-  calendar: typeof CalendarSticker
-  qrcode: typeof QrcodeSticker
-  'css-is-awesome': typeof CssIsAwesomeSticker
-  notion: typeof NotionLogoSticker
-  'notion-calendar': typeof NotionCalendarLogoSticker
-}
-export type StickerType = keyof StickerClassMap
-export type StickerClass<T extends StickerType> = StickerClassMap[T]
-export type StickerParams<T extends StickerType> = ConstructorParameters<StickerClassCtorMap[T]>[0]
+type FirstParam<T extends (...args: never[]) => unknown> =
+  Parameters<T> extends [] ? undefined : Parameters<T>[0]
+
+export type StickerType = keyof typeof stickerRegistry
+export type StickerDefinition<T extends StickerType = StickerType> = (typeof stickerRegistry)[T]
+export type StickerInstance<T extends StickerType> = ReturnType<StickerDefinition<T>['create']>
+export type StickerParams<T extends StickerType> = FirstParam<StickerDefinition<T>['create']>
+
+export default stickerRegistry

@@ -1,11 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
+import type { ServerContext } from '@/server/cloudflare'
 import { stickerResponse } from '@/server/sticker-response'
 import createSticker from '@/shared/core'
+
+interface StickerHandlerArgs {
+  context: ServerContext
+  params: { filename: string }
+  request: Request
+}
 
 export const Route = createFileRoute('/api/sticker/$filename')({
   server: {
     handlers: {
-      GET: async ({ params, request }) => {
+      // @ts-ignore
+      GET: async ({ context, params, request }: StickerHandlerArgs) => {
         const { text, format } = parseFilename(params.filename)
         if (!text) return new Response(null, { status: 204 })
 
@@ -15,7 +23,7 @@ export const Route = createFileRoute('/api/sticker/$filename')({
           text,
         })
 
-        return stickerResponse(sticker, format, request.url)
+        return stickerResponse(sticker, format, request.url, context.cloudflare.env.ASSETS)
       },
     },
   },

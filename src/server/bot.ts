@@ -1,13 +1,14 @@
 import type { CacheNamespace } from './cloudflare'
 import { sha256 } from './hash'
+import { createStickerFromRequest, resolveInlineSticker } from './inline-sticker'
 import { help, helpCalendar, helpPhrase } from './messages'
-import { parseQuery, type QueryArgs } from './query'
+import { parseQuery } from './query'
 import type { Telegram } from './utils/telegram'
 import telegram from './utils/telegram'
-import createSticker from '@/shared/core'
-import { withAssetBaseUrl } from '@/shared/core/assets'
+import { createStickerRenderContext, type CloudflareAssetsBinding } from '@/shared/core/assets'
 import { SupportedFormat } from '@/shared/core/utils'
 
+export { createStickerFromRequest, resolveInlineSticker } from './inline-sticker'
 export { parseQuery } from './query'
 
 interface CacheItem {
@@ -17,7 +18,11 @@ interface CacheItem {
   created_at: string
 }
 
-export async function handleBotHook(request: Request, cache: CacheNamespace): Promise<Response> {
+export async function handleBotHook(
+  request: Request,
+  cache: CacheNamespace,
+  assets?: CloudflareAssetsBinding,
+): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token')
   if (process.env.NODE_ENV !== 'development' && secret !== process.env.TG_BOT_SECRET) {
     return empty()
@@ -31,7 +36,7 @@ export async function handleBotHook(request: Request, cache: CacheNamespace): Pr
       await handleMessage(update as Telegram.Update<'message'>)
       return empty()
     case 'inline_query':
-      await handleInlineQuery(update as Telegram.Update<'inline_query'>, request.url, cache)
+      await handleInlineQuery(update as Telegram.Update<'inline_query'>, request.url, cache, assets)
       return empty()
     default:
       return empty()
@@ -79,57 +84,16 @@ async function handleInlineQuery(
   update: Telegram.Update<'inline_query'>,
   requestUrl: string,
   cache: CacheNamespace,
+  assets?: CloudflareAssetsBinding,
 ): Promise<void> {
   const queryId = update.inline_query.id
   const parsedQuery = parseQuery(update.inline_query.query)
   if (!parsedQuery) return
 
-  const [type, args] = parsedQuery
-  let sticker: ReturnType<typeof createSticker> | undefined
+  const stickerRequest = resolveInlineSticker(parsedQuery)
+  if (!stickerRequest) return
 
-  switch (type) {
-    case undefined:
-    case 'phrase': {
-      const { 0: text, ...params } = args
-      if (!text) return
-      const fullText = getPositionalArgs(args).join(' ')
-
-      switch (true) {
-        case text === 'css' && fullText === 'css is awesome':
-          sticker = createSticker('css-is-awesome')
-          break
-        case text === 'notion' && fullText === 'notion logo':
-          sticker = createSticker('notion')
-          break
-        case text === 'notion' && fullText === 'notion calendar logo':
-          sticker = createSticker('notion-calendar')
-          break
-        default:
-          sticker = createSticker('phrase', {
-            ...params,
-            max: Infinity,
-            text,
-          })
-      }
-      break
-    }
-    case 'calendar':
-    case 'cal': {
-      const { 0: date, ...params } = args
-      sticker = createSticker('calendar', { ...params, date })
-      break
-    }
-    case 'qrcode':
-    case 'qr': {
-      const { 0: data } = args
-      if (!data) return
-      sticker = createSticker('qrcode', { data })
-      break
-    }
-  }
-
-  if (!sticker) return
-
+  const sticker = createStickerFromRequest(stickerRequest)
   const cacheKey = await sha256(sticker.key)
   const cached = await getCacheItem(cache, cacheKey)
 
@@ -140,9 +104,9 @@ async function handleInlineQuery(
     } catch {}
   }
 
-  const stickerBuffer = await withAssetBaseUrl(requestUrl, () =>
-    sticker.render(SupportedFormat.webp).toBuffer(),
-  )
+  const stickerBuffer = await sticker
+    .render(SupportedFormat.webp, undefined, createStickerRenderContext(requestUrl, assets))
+    .toBuffer()
   const fileId = await telegram.sendSticker(stickerBuffer, Number(queryId))
   await Promise.all([
     telegram.answerInlineQuery(queryId, cacheKey, fileId),
@@ -150,7 +114,7 @@ async function handleInlineQuery(
       cacheKey,
       JSON.stringify({
         key: cacheKey,
-        data: JSON.parse(sticker.key),
+        data: stickerRequest,
         sticker_file_id: fileId,
         created_at: new Date().toISOString(),
       } satisfies CacheItem),
@@ -161,16 +125,6 @@ async function handleInlineQuery(
 async function getCacheItem(cache: CacheNamespace, key: string): Promise<CacheItem | null> {
   const cached = await cache.get(key)
   return cached ? (JSON.parse(cached) as CacheItem) : null
-}
-
-function getPositionalArgs(args: QueryArgs): string[] {
-  const values: string[] = []
-
-  for (let idx = 0; String(idx) in args; idx++) {
-    values.push(args[String(idx)])
-  }
-
-  return values
 }
 
 function empty(): Response {

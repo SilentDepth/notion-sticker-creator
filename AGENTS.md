@@ -1,3 +1,13 @@
+# The Project
+
+This project is a Notion sticker generation service. It provides several core features:
+
+- A web app that creates Notion stickers on browser.
+- A HTTP server that creates Notion stickers on demand.
+- A Telegram Bot backend that responds via @NotionStickerBot.
+
+This project is built with TanStack Start + Takumi, and aims to run on Cloudflare Workers.
+
 <!--VITE PLUS START-->
 
 # Using Vite+, the Unified Toolchain for the Web

@@ -1,4 +1,5 @@
-import Sticker from '@/shared/core/sticker.js'
+import { hash } from 'ohash'
+import { Component as Frame } from './notion-logo-frame'
 import { IS_BROWSER } from '@/shared/core/utils.js'
 
 enum LOCALES {
@@ -6,7 +7,7 @@ enum LOCALES {
   en = 'en',
 }
 
-interface Params {
+export interface Params {
   date?: string | Date
   color?: string
   timezone?: string
@@ -20,90 +21,96 @@ interface DateParts {
   weekday: number
 }
 
-export default class CalendarSticker extends Sticker {
-  readonly date: Date
-  readonly dateParts: DateParts
-  readonly color: string
-  readonly locale: LOCALES
+export interface NormalizedParams extends DateParts {
+  date: string
+  color: string
+  locale: LOCALES
+}
 
-  constructor(params: Params = {}) {
-    super('calendar')
+export function normalizeParams(params: Params = {}): NormalizedParams {
+  const dateParts = resolveDateParts(params.date, params.timezone)
 
-    this.dateParts = resolveDateParts(params.date, params.timezone)
-    this.date = new Date(
-      Date.UTC(this.dateParts.year, this.dateParts.month - 1, this.dateParts.day),
-    )
-    this.color =
-      params.color === 'week' ? weekdayColor(this.dateParts.weekday) : params.color || 'crimson'
-    this.locale = isLocale(params.locale) ? params.locale : LOCALES.zh
+  return {
+    ...dateParts,
+    date: formatDate(dateParts),
+    color: params.color === 'week' ? weekdayColor(dateParts.weekday) : params.color || 'crimson',
+    locale: isLocale(params.locale) ? params.locale : LOCALES.zh,
   }
+}
 
-  get key(): string {
-    this._key ??= JSON.stringify({
-      type: this.type,
-      date: [
-        this.dateParts.year,
-        String(this.dateParts.month).padStart(2, '0'),
-        String(this.dateParts.day).padStart(2, '0'),
-      ].join('-'),
-      // TODO: normalize color
-      color: this.color,
-      locale: this.locale,
-    })
-    return this._key
-  }
+export const getKey = (params?: Params) => {
+  const normalizedParams = normalizeParams(params)
 
-  renderNode(debug?: boolean) {
-    return Sticker.frame(
+  return createCalendarKey({
+    type: 'calendar',
+    date: normalizedParams.date,
+    color: normalizedParams.color,
+    locale: normalizedParams.locale,
+  })
+}
+
+export interface ComponentProps extends Params {
+  debug?: boolean
+}
+
+export function Component({ debug, ...params }: ComponentProps) {
+  const { year, month, day, weekday, color, locale } = normalizeParams(params)
+
+  const pStyle = Object.assign(
+    { margin: 0, fontFamily: 'Noto Serif SC' },
+    debug ? { outline: '1px solid #f0f', outlineOffset: -1 } : undefined,
+  )
+  const spanStyle = { display: 'block', transform: 'translateY(-5%)' }
+
+  return (
+    <Frame debug={debug}>
       <div
         style={{
+          height: '100%',
+          padding: '26px 0',
           fontFamily: 'Noto Serif SC',
+          lineHeight: 1,
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        <span
-          style={{
-            fontSize: 50,
-            lineHeight: 1,
-            height: '1em',
-            translate: '0 -5%',
-          }}
-        >
-          {`${this.dateParts.year} · ${this.dateParts.month}`}
-        </span>
-        <span
-          style={{
-            margin: '7px 0',
-            fontSize: 150,
-            lineHeight: 1,
-            height: '1em',
-            color: this.color,
-            translate: '0 -5%',
-            ...(debug ? { boxShadow: '0 0 0 1px #f0f' } : {}),
-          }}
-        >
-          {String(this.dateParts.day)}
-        </span>
-        <span
-          style={{
-            fontSize: 50,
-            lineHeight: 1,
-            height: '1em',
-            translate: '0 -5%',
-          }}
-        >
-          {weekday(this.dateParts.weekday, this.locale)}
-        </span>
-      </div>,
-      debug,
-    )
-  }
+        <p style={{ ...pStyle, fontSize: 50 }}>
+          <span style={spanStyle}>
+            {year} &middot; {month}
+          </span>
+        </p>
+        <p style={{ ...pStyle, fontSize: 150, color }}>
+          <span style={spanStyle}>{day}</span>
+        </p>
+        <p style={{ ...pStyle, fontSize: 50 }}>
+          <span style={spanStyle}>{weekdayName(weekday, locale)}</span>
+        </p>
+      </div>
+    </Frame>
+  )
 }
 
 function isLocale(locale: string | undefined): locale is LOCALES {
   return Boolean(locale && locale in LOCALES)
+}
+
+function createCalendarKey(params: {
+  type: 'calendar'
+  date: string
+  color: string
+  locale: LOCALES
+}): string {
+  return hash(params)
+}
+
+function formatDate(dateParts: DateParts): string {
+  return [
+    dateParts.year,
+    String(dateParts.month).padStart(2, '0'),
+    String(dateParts.day).padStart(2, '0'),
+  ].join('-')
 }
 
 function resolveDateParts(date: string | Date | undefined, timezone = 'Asia/Shanghai'): DateParts {
@@ -158,7 +165,7 @@ function getUtcWeekday(year: number, month: number, day: number): number {
   return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
 }
 
-function weekday(day: number, locale: string): string {
+function weekdayName(day: number, locale: string): string {
   switch (true) {
     case locale.startsWith('en'):
       return ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][day]

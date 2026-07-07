@@ -5,62 +5,64 @@ import IMAGE_NOTION from '@/assets/images/notion-logo.png?inline'
 export { IMAGE_FRAME, IMAGE_NOTION, IMAGE_NOTION_CALENDAR }
 
 const FONT_PATH = '/assets/NotoSerifSC-Bold.otf'
-let assetBaseUrl: string | undefined
 let fontPromise: Promise<ArrayBuffer> | undefined
 
-interface CloudflareAssetsBinding {
+export interface CloudflareAssetsBinding {
   fetch(request: Request): Promise<Response>
 }
 
-interface CloudflareRuntime {
-  __env__?: {
-    ASSETS?: CloudflareAssetsBinding
+export interface StickerRenderContext {
+  assets?: CloudflareAssetsBinding
+  assetBaseUrl?: string
+}
+
+export function createStickerRenderContext(
+  requestUrl?: string,
+  assets?: CloudflareAssetsBinding,
+): StickerRenderContext {
+  return {
+    ...(assets ? { assets } : {}),
+    ...(requestUrl ? { assetBaseUrl: new URL(requestUrl).origin } : {}),
   }
 }
 
-export async function withAssetBaseUrl<T>(
-  requestUrl: string,
-  callback: () => Promise<T>,
-): Promise<T> {
-  const previousAssetBaseUrl = assetBaseUrl
-  assetBaseUrl = new URL(requestUrl).origin
+export async function loadNotoSerifScFont(
+  context: StickerRenderContext = {},
+): Promise<ArrayBuffer> {
+  fontPromise ??= fetchAsset(FONT_PATH, context)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load font: ${response.status}`)
+      }
 
-  try {
-    return await callback()
-  } finally {
-    assetBaseUrl = previousAssetBaseUrl
-  }
-}
-
-export async function loadNotoSerifScFont(): Promise<ArrayBuffer> {
-  fontPromise ??= fetchAsset(FONT_PATH).then(response => {
-    if (!response.ok) {
-      throw new Error(`Failed to load font: ${response.status}`)
-    }
-
-    return response.arrayBuffer()
-  })
+      return response.arrayBuffer()
+    })
+    .catch(error => {
+      fontPromise = undefined
+      throw error
+    })
 
   return fontPromise
 }
 
-function fetchAsset(path: string): Promise<Response> {
-  const assets = (globalThis as typeof globalThis & CloudflareRuntime).__env__?.ASSETS
-  if (import.meta.env.SSR && assets) {
-    return assets.fetch(new Request(new URL(path, 'https://assets.local')))
+function fetchAsset(path: string, context: StickerRenderContext): Promise<Response> {
+  if (import.meta.env.SSR && context.assets) {
+    return context.assets.fetch(
+      new Request(new URL(path, context.assetBaseUrl ?? 'https://assets.local')),
+    )
   }
 
-  return fetch(assetUrl(path))
+  return fetch(assetUrl(path, context))
 }
 
-function assetUrl(path: string): string {
+function assetUrl(path: string, context: StickerRenderContext): string {
   if (!import.meta.env.SSR) {
     return path
   }
 
-  if (!assetBaseUrl) {
+  if (!context.assetBaseUrl) {
     throw new Error('Asset base URL is not set for server-side sticker rendering')
   }
 
-  return new URL(path, assetBaseUrl).href
+  return new URL(path, context.assetBaseUrl).href
 }

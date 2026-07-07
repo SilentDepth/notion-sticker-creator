@@ -1,30 +1,18 @@
+import { hash } from 'ohash'
 import { renderUnicode } from 'uqr'
-import PhraseSticker from '@/shared/core/sticker-types/phrase.js'
-import Sticker from '@/shared/core/sticker.js'
+import { Component as PhraseComponent } from '@/shared/core/sticker-types/phrase.js'
 
-interface Params {
+export interface Params {
   data: string
 }
 
-export default class QrcodeSticker extends Sticker {
-  readonly data: string
+export const getKey = (params: Params) => hash({ type: 'qrcode', data: params.data })
 
-  constructor(params: Params) {
-    super('qrcode')
+export interface ComponentProps extends Params {
+  debug?: boolean
+}
 
-    this.data = params.data
-  }
-
-  get key(): string {
-    return JSON.stringify({
-      type: this.type,
-      data: this.data,
-    })
-  }
-
-  renderNode() {
-    const text = renderUnicode(this.data, { blackChar: '█', whiteChar: ' ' }).replaceAll('\n', '')
-    const phraseSticker = new PhraseSticker({ text })
-    return phraseSticker.renderNode()
-  }
+export function Component({ data, debug }: ComponentProps) {
+  const text = renderUnicode(data, { blackChar: '█', whiteChar: ' ' }).replaceAll('\n', '')
+  return PhraseComponent({ text, debug })
 }

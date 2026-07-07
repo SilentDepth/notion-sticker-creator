@@ -1,35 +1,15 @@
-import Sticker from '@/shared/core/sticker'
-import {
-  CssIsAwesomeSticker,
-  PhraseSticker,
-  CalendarSticker,
-  QrcodeSticker,
-  NotionLogoSticker,
-  NotionCalendarLogoSticker,
-} from '@/shared/core/sticker-types'
-import type { StickerClass, StickerParams, StickerType } from '@/shared/core/sticker-types'
+import { stickerRegistry } from '@/shared/core/sticker-types'
+import type { StickerInstance, StickerParams, StickerType } from '@/shared/core/sticker-types'
 
 export * from '@/shared/core/sticker-types'
 
 export default function createSticker<T extends StickerType>(
   type: T,
   params?: StickerParams<T>,
-): StickerClass<T>
-export default function createSticker(type: StickerType, params?: any): Sticker {
-  switch (type) {
-    case 'phrase':
-      return new PhraseSticker(params)
-    case 'calendar':
-      return new CalendarSticker(params)
-    case 'qrcode':
-      return new QrcodeSticker(params)
-    case 'css-is-awesome':
-      return new CssIsAwesomeSticker()
-    case 'notion':
-      return new NotionLogoSticker()
-    case 'notion-calendar':
-      return new NotionCalendarLogoSticker()
-    default:
-      throw new Error('Unsupported sticker type')
-  }
+): StickerInstance<T>
+export default function createSticker<T extends StickerType>(
+  type: T,
+  params?: StickerParams<T>,
+): StickerInstance<T> {
+  return stickerRegistry[type].create(params as never) as StickerInstance<T>
 }
