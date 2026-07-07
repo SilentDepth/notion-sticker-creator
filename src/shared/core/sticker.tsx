@@ -63,8 +63,14 @@ export function renderStickerNode(
 
   return new StickerRenderResult((resolve, reject) => {
     void (async () => {
-      const { render, renderSvg } = await import('takumi-js')
-      const node = (await renderNode(debug)) as Parameters<typeof render>[0]
+      const { render, renderSvg } = await measure(
+        context,
+        'takumi.import',
+        () => import('takumi-js'),
+      )
+      const node = (await measure(context, 'render.node', () => renderNode(debug))) as Parameters<
+        typeof render
+      >[0]
       const options = {
         width: STICKER_SIZE,
         height: STICKER_SIZE,
@@ -81,18 +87,34 @@ export function renderStickerNode(
 
       switch (format) {
         case SupportedFormat.png:
-          resolve(await render(node, { ...options, format: 'png' }))
+          resolve(
+            await measure(context, 'takumi.render', () =>
+              render(node, { ...options, format: 'png' }),
+            ),
+          )
           return
         case SupportedFormat.webp:
-          resolve(await render(node, { ...options, format: 'webp', lossless: true }))
+          resolve(
+            await measure(context, 'takumi.render', () =>
+              render(node, { ...options, format: 'webp', lossless: true }),
+            ),
+          )
           return
         case SupportedFormat.svg:
         default:
-          resolve(await renderSvg(node, options))
+          resolve(await measure(context, 'takumi.render', () => renderSvg(node, options)))
           return
       }
     })().catch(reject)
   })
+}
+
+function measure<T>(
+  context: StickerRenderContext,
+  name: string,
+  callback: () => Promise<T> | T,
+): Promise<T> {
+  return context.profiler ? context.profiler.measure(name, callback) : Promise.resolve(callback())
 }
 
 export async function frame(content: ReactNode, debug?: boolean): Promise<ReactNode> {
