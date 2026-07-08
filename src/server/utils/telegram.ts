@@ -117,11 +117,23 @@ class Telegram {
   }
 
   async sendSticker(stickerData: Uint8Array, randomSeed: number): Promise<string> {
-    const form = new FormData()
-    form.append(
-      'chat_id',
+    return this.uploadStickerToChat(
+      stickerData,
       this.driveChats[Math.abs(randomSeed) % this.driveChats.length] ?? this.driveChats[0],
     )
+  }
+
+  async sendStickerFile(chat_id: number, sticker_file_id: string): Promise<string> {
+    const message = await this.call<Telegram.Message<'sticker'>>('sendSticker', {
+      chat_id,
+      sticker: sticker_file_id,
+    })
+    return message.sticker.file_id
+  }
+
+  private async uploadStickerToChat(stickerData: Uint8Array, chatId: string): Promise<string> {
+    const form = new FormData()
+    form.append('chat_id', chatId)
     const sticker = new Uint8Array(stickerData.byteLength)
     sticker.set(stickerData)
     form.append('sticker', new Blob([sticker], { type: 'image/webp' }), 'sticker.webp')
